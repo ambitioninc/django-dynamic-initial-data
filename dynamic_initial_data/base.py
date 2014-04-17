@@ -2,9 +2,6 @@ import abc
 
 from django.conf import settings
 
-from initial_data.exceptions import InitialDataCircularDependency
-from initial_data.utils.import_string import import_string
-
 class BaseInitialData(object):
     dependencies = []
 
