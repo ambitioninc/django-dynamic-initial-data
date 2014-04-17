@@ -7,11 +7,8 @@ def import_string(module_string):
     file_name = parts[-2]
 
     try:
-        print path, file_name, module_name
         module_path = __import__(path,  globals(), locals(), [file_name])
-        print 'imported', module_path
-    except ImportError, e:
-        print e
+    except ImportError:
         return None
 
     if not module_path or not hasattr(module_path, module_name):

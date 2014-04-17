@@ -1,6 +1,9 @@
 import abc
 
 from django.conf import settings
+from dynamic_initial_data.exceptions import InitialDataCircularDependency
+from dynamic_initial_data.utils.import_string import import_string
+
 
 class BaseInitialData(object):
     dependencies = []
@@ -16,9 +19,7 @@ class InitialDataManager(object):
 
     def load_app(self, app):
         class_path = '{0}.fixtures.initial_data.InitialData'.format(app)
-        print 'load', class_path
         initial_data_class = import_string(class_path)
-        print initial_data_class
         if initial_data_class and issubclass(initial_data_class, BaseInitialData):
             return initial_data_class
         return None
