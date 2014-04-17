@@ -1,5 +1,3 @@
-import abc
-
 from django.conf import settings
 from dynamic_initial_data.exceptions import InitialDataCircularDependency, InitialDataMissingApp
 from dynamic_initial_data.utils.import_string import import_string
@@ -8,9 +6,8 @@ from dynamic_initial_data.utils.import_string import import_string
 class BaseInitialData(object):
     dependencies = []
 
-    @abc.abstractmethod
     def update_static(self, *args, **kwargs):
-        pass
+        raise NotImplemented('{0} did not implement update_static', self)
 
 
 class InitialDataManager(object):
