@@ -14,7 +14,7 @@ class UtilTest(TestCase):
         self.assertIsNone(import_string('nope.nope'))
 
         # Make sure an invalid module name returns None
-        self.assertIsNone(import_string('app_config.nope'))
+        self.assertIsNone(import_string('initial_data.nope'))
 
         # For test coverage, import a null value
-        self.assertIsNone(import_string('app_config.tests.mocks.mock_null_value'))
+        self.assertIsNone(import_string('initial_data.tests.mocks.mock_null_value'))

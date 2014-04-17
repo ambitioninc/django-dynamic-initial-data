@@ -8,7 +8,7 @@ APP_PATH = os.path.join(settings.PROJECT_PATH, 'apps')
 
 
 class Command(BaseCommand):
-    help = 'Detect any dependency cycles in the app_config process'
+    help = 'Detect any dependency cycles in the initial_data process'
 
     def handle(self, *args, **options):
         pass

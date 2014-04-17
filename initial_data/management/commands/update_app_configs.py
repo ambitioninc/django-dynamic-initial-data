@@ -1,7 +1,7 @@
 from optparse import make_option
 
 from django.core.management.base import BaseCommand
-from initial_data.app_config_file import AppConfigManager
+from initial_data.initial_data import InitialDataManager
 
 
 class Command(BaseCommand):
@@ -14,5 +14,5 @@ class Command(BaseCommand):
     help = 'Call the AppInit.update command for all apps'
 
     def handle(self, *args, **options):
-        manager = AppConfigManager()
+        manager = InitialDataManager()
         manager.update_app('ambition.apps.account')

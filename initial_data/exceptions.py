@@ -1,6 +1,6 @@
 
 
-class AppConfigCircularDependency(Exception):
+class InitialDataCircularDependency(Exception):
     def __init__(self, *args, **kwargs):
         dep = kwargs.get('dep')
         call_list = kwargs.get('call_list')
@@ -13,4 +13,4 @@ class AppConfigCircularDependency(Exception):
             for i, item in enumerate(call_list)
         ]
         error_str = 'Circular dependency found\n{0}'.format('\n'.join(call_lines))
-        super(AppConfigCircularDependency, self).__init__(error_str)
+        super(InitialDataCircularDependency, self).__init__(error_str)

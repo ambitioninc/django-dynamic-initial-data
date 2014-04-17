@@ -9,7 +9,7 @@ def get_version():
     """
     Extracts the version number from the version.py file.
     """
-    VERSION_FILE = 'app_config/version.py'
+    VERSION_FILE = 'initial_data/version.py'
     mo = re.search(r'^__version__ = [\'"]([^\'"]*)[\'"]', open(VERSION_FILE, 'rt').read(), re.M)
     if mo:
         return mo.group(1)
@@ -18,7 +18,7 @@ def get_version():
 
 
 setup(
-    name='django-app-config',
+    name='django-initial-data',
     version=get_version(),
     description='',
     long_description=open('README.md').read(),
@@ -37,6 +37,7 @@ setup(
     license='MIT',
     install_requires=[
         'django>=1.6',
+        'django-manager-utils>=0.3.6',
     ],
     tests_require=[
         'psycopg2',

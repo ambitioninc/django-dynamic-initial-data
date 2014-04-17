@@ -22,12 +22,12 @@ if not settings.configured:
         db_config = {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'USER': 'postgres',
-            'NAME': 'app_config',
+            'NAME': 'initial_data',
         }
     elif test_db == 'sqlite':
         db_config = {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': 'app_config',
+            'NAME': 'initial_data',
         }
     else:
         raise RuntimeError('Unsupported test DB {0}'.format(test_db))
@@ -42,10 +42,10 @@ if not settings.configured:
             'django.contrib.sessions',
             'django.contrib.admin',
             'south',
-            'app_config',
-            'app_config.tests',
+            'initial_data',
+            'initial_data.tests',
         ),
-        ROOT_URLCONF='app_config.urls',
+        ROOT_URLCONF='initial_data.urls',
         DEBUG=False,
     )
 
@@ -59,7 +59,7 @@ def run_tests(*test_args, **kwargs):
         patch_for_test_db_setup()
 
     if not test_args:
-        test_args = ['app_config']
+        test_args = ['initial_data']
 
     kwargs.setdefault('interactive', False)
 
