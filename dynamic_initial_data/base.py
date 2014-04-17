@@ -1,4 +1,5 @@
 from django.conf import settings
+
 from dynamic_initial_data.exceptions import InitialDataCircularDependency, InitialDataMissingApp
 from dynamic_initial_data.utils.import_string import import_string
 
@@ -7,16 +8,18 @@ class BaseInitialData(object):
     dependencies = []
 
     def update_static(self, *args, **kwargs):
-        raise NotImplemented('{0} did not implement update_static', self)
+        raise NotImplementedError('{0} did not implement update_static'.format(self))
 
 
 class InitialDataManager(object):
     def __init__(self):
         self.updated_apps = []
 
+    def get_class_path(self, app):
+        return '{0}.fixtures.initial_data.InitialData'.format(app)
+
     def load_app(self, app):
-        class_path = '{0}.fixtures.initial_data.InitialData'.format(app)
-        initial_data_class = import_string(class_path)
+        initial_data_class = import_string(self.get_class_path(app))
         if initial_data_class and issubclass(initial_data_class, BaseInitialData):
             return initial_data_class
         return None
@@ -27,15 +30,16 @@ class InitialDataManager(object):
             return
         # load the app config class
         initial_data_class = self.load_app(app)
-        InitialDataMissingApp(app)
         if initial_data_class:
             # update static data
             dependencies = self.detect_dependency_cycles(app)
             for dependency in dependencies[1:]:
                 self.update_app(dependency)
             initial_data_class().update_static()
-        # keep track that this app has been updated
-        self.updated_apps.append(app)
+            # keep track that this app has been updated
+            self.updated_apps.append(app)
+        else:
+            raise InitialDataMissingApp(app)
 
     def update_all_apps(self):
         for app in settings.INSTALLED_APPS:
