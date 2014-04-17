@@ -1,9 +1,10 @@
+from django.conf import settings
 from django.test import TestCase
 from mock import patch
 
 from dynamic_initial_data.base import BaseInitialData, InitialDataManager
-from dynamic_initial_data.exceptions import InitialDataMissingApp
-from dynamic_initial_data.tests.mocks import MockInitialData, MockClass, MockOne, MockTwo
+from dynamic_initial_data.exceptions import InitialDataMissingApp, InitialDataCircularDependency
+from dynamic_initial_data.tests.mocks import MockInitialData, MockClass, MockOne, MockTwo, MockThree
 
 
 class BaseInitialDataTest(TestCase):
@@ -69,9 +70,11 @@ class InitialDataManagerTest(TestCase):
                 return MockTwo
             return None
 
+        # coverage
+        app_loader(None)
+
         initial_data_manager = InitialDataManager()
         with patch('dynamic_initial_data.base.InitialDataManager.load_app') as load_app_patch:
-            # get_path_patch.return_value = None
             load_app_patch.side_effect = app_loader
 
             # patch update_static methods
@@ -88,14 +91,27 @@ class InitialDataManagerTest(TestCase):
             update_static_patcher2.stop()
 
 
-    def update_all_apps(self):
+    def test_update_all_apps(self):
         """
         Verifies that update_app is called with all installed apps
         """
-        pass
+        num_apps = len(settings.INSTALLED_APPS)
+        with patch('dynamic_initial_data.base.InitialDataManager.update_app') as update_app_patch:
+            initial_data_manager = InitialDataManager()
+            initial_data_manager.update_all_apps()
+            self.assertEqual(num_apps, update_app_patch.call_count)
 
-    def detect_dependency_cycles(self):
+    def test_detect_dependency_cycles(self):
         """
         Makes sure that dependency cycles are found and raises an exception
         """
-        pass
+        initial_data_manager = InitialDataManager()
+        with patch('dynamic_initial_data.base.InitialDataManager.load_app') as load_app_patch:
+            load_app_patch.return_value = MockThree
+
+            with self.assertRaises(InitialDataCircularDependency):
+                initial_data_manager.update_app('MockThree')
+
+        initial_data_manager = InitialDataManager()
+        with self.assertRaises(InitialDataMissingApp):
+            initial_data_manager.detect_dependency_cycles('fake')

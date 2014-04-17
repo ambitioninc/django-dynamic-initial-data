@@ -16,4 +16,4 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         manager = InitialDataManager()
-        manager.update_app('ambition.apps.account')
+        manager.update_all_apps()

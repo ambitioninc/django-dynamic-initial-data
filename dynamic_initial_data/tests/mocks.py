@@ -7,15 +7,14 @@ class MockClass(object):
 
 
 class MockInitialData(BaseInitialData):
-    def update_static(self, *args, **kwargs):
-        pass
+    pass
 
 class MockOne(BaseInitialData):
-    def update_static(self, *args, **kwargs):
-        pass
-
+    pass
 
 class MockTwo(BaseInitialData):
     dependencies = ['MockOne']
-    def update_static(self, *args, **kwargs):
-        pass
+
+
+class MockThree(BaseInitialData):
+    dependencies = ['MockThree']

@@ -56,4 +56,6 @@ class InitialDataManager(object):
                 else:
                     self.detect_dependency_cycles(dep, call_list + [dep])
             call_list += dependencies
+        else:
+            raise InitialDataMissingApp(app)
         return call_list
