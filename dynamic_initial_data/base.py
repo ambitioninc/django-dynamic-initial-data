@@ -1,7 +1,7 @@
 import abc
 
 from django.conf import settings
-from dynamic_initial_data.exceptions import InitialDataCircularDependency
+from dynamic_initial_data.exceptions import InitialDataCircularDependency, InitialDataMissingApp
 from dynamic_initial_data.utils.import_string import import_string
 
 
@@ -30,9 +30,12 @@ class InitialDataManager(object):
             return
         # load the app config class
         initial_data_class = self.load_app(app)
+        InitialDataMissingApp(app)
         if initial_data_class:
             # update static data
-            self.detect_dependency_cycles(app)
+            dependencies = self.detect_dependency_cycles(app)
+            for dependency in dependencies[1:]:
+                self.update_app(dependency)
             initial_data_class().update_static()
         # keep track that this app has been updated
         self.updated_apps.append(app)
