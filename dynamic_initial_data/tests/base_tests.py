@@ -90,7 +90,6 @@ class InitialDataManagerTest(TestCase):
             update_static_patcher1.stop()
             update_static_patcher2.stop()
 
-
     def test_update_all_apps(self):
         """
         Verifies that update_app is called with all installed apps
