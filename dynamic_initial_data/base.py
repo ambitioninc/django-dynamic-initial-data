@@ -59,13 +59,12 @@ class InitialDataManager(object):
         if self.loaded_apps.get(app):
             return self.loaded_apps.get(app)
 
+        self.loaded_apps[app] = None
         initial_data_class = import_string(self.get_class_path(app))
         if initial_data_class and issubclass(initial_data_class, BaseInitialData):
-            if self.verbose:
-                print 'Loaded app {0}'.format(app)
+            self.log('Loaded app {0}'.format(app))
             self.loaded_apps[app] = initial_data_class
-            return initial_data_class
-        return None
+        return self.loaded_apps[app]
 
     def update_app(self, app):
         """
@@ -83,8 +82,7 @@ class InitialDataManager(object):
         # load the app config class
         initial_data_class = self.load_app(app)
         if initial_data_class:
-            if self.verbose:
-                print 'Checking dependencies for {0}'.format(app)
+            self.log('Checking dependencies for {0}'.format(app))
 
             # detect cycles and missing dependencies
             dependencies = self.detect_dependency_cycles(app)
@@ -93,8 +91,7 @@ class InitialDataManager(object):
             for dependency in dependencies[1:]:
                 self.update_app(dependency)
 
-            if self.verbose:
-                print 'Updating app {0}'.format(app)
+            self.log('Updating app {0}'.format(app))
 
             initial_data_class().update_static()
             # keep track that this app has been updated
@@ -134,3 +131,11 @@ class InitialDataManager(object):
         else:
             raise InitialDataMissingApp(dep=app)
         return call_list
+
+    def log(self, str):
+        """
+        Convenient way to output data and maintain coverage without having if-statements scattered throughout
+        the code base with duplicate tests to test the verbose branches
+        """
+        if self.verbose:
+            print str

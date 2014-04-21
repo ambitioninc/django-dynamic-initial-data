@@ -21,6 +21,16 @@ class InitialDataManagerTest(TestCase):
     """
     Tests the functionality of the InitialDataManager
     """
+    def test_verbose_option(self):
+        """
+        Verifies that the verbose option gets set from the manage options
+        """
+        options = {'verbose': True}
+        initial_data_manager = InitialDataManager(options)
+        self.assertTrue(initial_data_manager.verbose)
+        # cover the branch that prints if verbose is true
+        initial_data_manager.log('test')
+
     def test_load_app(self):
         """
         Tests the load_app method
@@ -29,6 +39,9 @@ class InitialDataManagerTest(TestCase):
             import_patch.return_value = MockInitialData
             initial_data_manager = InitialDataManager()
             self.assertEqual(MockInitialData, initial_data_manager.load_app('fake'))
+
+            # try to load an app that doesn't exist
+            initial_data_manager = InitialDataManager()
             import_patch.return_value = MockClass
             self.assertIsNone(initial_data_manager.load_app('fake'))
 
