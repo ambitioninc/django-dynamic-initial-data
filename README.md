@@ -10,6 +10,8 @@ a planned feature.
 ## Table of Contents
 
 1. [Installation] (#installation)
+1. [A Brief Overview] (#a-brief-overview)
+1. [Example] (#example)
 
 ## Installation
 To install Django Dynamic Initial Data:
@@ -45,7 +47,7 @@ If `update_static` is not implemented, then a `NotImplementedError` will be rais
 Any dependencies should be included in a list called `dependencies`. Each dependency is a string
 of the app name as defined in `INSTALLED_APPS`.
 
-## Examples:
+## Example:
 
 ```python
 from dynamic_initial_data.base import BaseInitialData
