@@ -18,7 +18,7 @@ def get_version():
 
 
 setup(
-    name='django-initial-data',
+    name='django-dynamic-initial-data',
     version=get_version(),
     description='',
     long_description=open('README.md').read(),
