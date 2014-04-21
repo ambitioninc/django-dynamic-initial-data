@@ -1,4 +1,8 @@
 def import_string(module_string):
+    """
+    Loads the class specified by module string. This should be the full class to the path
+    Example: app.name.module.ClassName
+    """
     parts = module_string.split('.')
     assert len(parts) > 1
 

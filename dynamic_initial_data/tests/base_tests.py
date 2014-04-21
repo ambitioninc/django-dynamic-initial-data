@@ -36,10 +36,10 @@ class InitialDataManagerTest(TestCase):
         """
         Tests the update_app method
         """
-        # make sure an error is raised for missing app
+        # an error should only be raised for missing dependencies and not for directly
+        # calling update on an app that doesn't have an initial data file
         initial_data_manager = InitialDataManager()
-        with self.assertRaises(InitialDataMissingApp):
-            initial_data_manager.update_app('fake')
+        initial_data_manager.update_app('fake')
 
         # make sure app gets added to updated apps
         initial_data_manager = InitialDataManager()

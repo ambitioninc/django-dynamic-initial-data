@@ -1,5 +1,8 @@
 
 class InitialDataCircularDependency(Exception):
+    """
+    Raised when a circular dependency is detected.
+    """
     def __init__(self, *args, **kwargs):
         dep = kwargs.get('dep')
         call_list = kwargs.get('call_list')
@@ -13,6 +16,9 @@ class InitialDataCircularDependency(Exception):
 
 
 class InitialDataMissingApp(Exception):
+    """
+    Raised when a specified app cannot be loaded because it does not exist.
+    """
     def __init__(self, *args, **kwargs):
         dep = kwargs.get('dep')
         error_str = 'Missing dependency {0}'.format(dep)

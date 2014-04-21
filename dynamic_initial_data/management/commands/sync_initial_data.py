@@ -15,5 +15,5 @@ class Command(BaseCommand):
     help = 'Call the AppInit.update command for all apps'
 
     def handle(self, *args, **options):
-        manager = InitialDataManager()
+        manager = InitialDataManager(options)
         manager.update_all_apps()
