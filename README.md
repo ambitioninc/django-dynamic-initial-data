@@ -31,7 +31,7 @@ INSTALLED_APPS = (
 
 ## A Brief Overview
 
-A management command `sync_initial_data` is provided which will try to update all `INSTALLED_APPS`. This
+A management command `update_initial_data` is provided which will try to update all `INSTALLED_APPS`. This
 command is intended to be called as part of the deployment process of your app. Any missing dependencies
 will raise an `InitialDataMissingApp` exception and any circular dependencies will raise an
 `InitialDataCircularDependency` exception.
