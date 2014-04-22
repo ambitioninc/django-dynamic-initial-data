@@ -22,7 +22,7 @@ class BaseInitialData(object):
         raise NotImplementedError('{0} did not implement update_static'.format(self))
 
 
-class InitialDataManager(object):
+class InitialDataUpdater(object):
     """
     This object is created to handle the updating process of an app or multiple apps. A cache is
     built of the updated apps, so the same app is never initialized more than once. Handles the loading

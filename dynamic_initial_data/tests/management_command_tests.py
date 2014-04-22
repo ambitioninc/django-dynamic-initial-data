@@ -11,6 +11,6 @@ class SyncInitialDataTest(TestCase):
         """
         Makes sure the update_initial_data method gets called when the command is run
         """
-        with patch('dynamic_initial_data.base.InitialDataManager.update_all_apps') as update_patch:
+        with patch('dynamic_initial_data.base.InitialDataUpdater.update_all_apps') as update_patch:
             call_command('update_initial_data')
             self.assertEqual(1, update_patch.call_count)

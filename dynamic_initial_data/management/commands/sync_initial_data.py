@@ -2,7 +2,7 @@ from optparse import make_option
 
 from django.core.management.base import BaseCommand
 
-from dynamic_initial_data.base import InitialDataManager
+from dynamic_initial_data.base import InitialDataUpdater
 
 
 class Command(BaseCommand):
@@ -15,5 +15,5 @@ class Command(BaseCommand):
     help = 'Call the AppInit.update command for all apps'
 
     def handle(self, *args, **options):
-        manager = InitialDataManager(options)
+        manager = InitialDataUpdater(options)
         manager.update_all_apps()
