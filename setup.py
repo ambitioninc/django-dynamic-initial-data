@@ -24,7 +24,7 @@ setup(
     long_description=open('README.md').read(),
     url='',
     author='',
-    author_email='',
+    author_email='opensource@ambition.com',
     keywords='',
     packages=find_packages(),
     classifiers=[
