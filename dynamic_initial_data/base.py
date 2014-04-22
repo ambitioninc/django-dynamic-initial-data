@@ -48,7 +48,7 @@ class InitialDataManager(object):
     def load_app(self, app):
         """
         Tries to load an initial data class for a specified app. If the specified file does not exist,
-        and error will be raised. If the class does exist, but it isn't a subclass of `BaseInitialData`
+        an error will be raised. If the class does exist, but it isn't a subclass of `BaseInitialData`
         then None will be returned.
         :param app: The name of the app in which to load the initial data class. This should be the same
             path as defined in settings.INSTALLED_APPS
