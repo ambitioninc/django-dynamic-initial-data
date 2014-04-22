@@ -79,7 +79,7 @@ class InitialDataUpdater(object):
         if app in self.updated_apps:
             return
 
-        # load the app config class
+        # load the initial data class
         initial_data_class = self.load_app(app)
         if initial_data_class:
             self.log('Checking dependencies for {0}'.format(app))
