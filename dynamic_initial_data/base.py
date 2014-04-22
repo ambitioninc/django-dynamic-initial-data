@@ -7,7 +7,7 @@ from dynamic_initial_data.utils.import_string import import_string
 class BaseInitialData(object):
     """
     Base class for handling initial data for an app. Subclasses are expected to implement the
-    `update_static` method to handle any data creation / modifications. The dependencies list
+    `update_initial_data` method to handle any data creation / modifications. The dependencies list
     should contain strings of the app names that are required to be initialized first. These
     app names should be the full app path equivalent to how it is defined in settings.INSTALLED_APPS
     Example:
@@ -15,11 +15,11 @@ class BaseInitialData(object):
     """
     dependencies = []
 
-    def update_static(self, *args, **kwargs):
+    def update_initial_data(self, *args, **kwargs):
         """
         Raises an error if the subclass does not implement this
         """
-        raise NotImplementedError('{0} did not implement update_static'.format(self))
+        raise NotImplementedError('{0} did not implement update_initial_data'.format(self))
 
 
 class InitialDataUpdater(object):
@@ -68,7 +68,7 @@ class InitialDataUpdater(object):
 
     def update_app(self, app):
         """
-        Loads and runs `update_static` of the specified app. Any dependencies contained within the
+        Loads and runs `update_initial_data` of the specified app. Any dependencies contained within the
         initial data class will be run recursively. Dependency cycles are checked for and a cache is built
         for updated apps to prevent updating the same app more than once.
         :param app: The name of the app to update. This should be the same path as defined
@@ -93,7 +93,7 @@ class InitialDataUpdater(object):
 
             self.log('Updating app {0}'.format(app))
 
-            initial_data_class().update_static()
+            initial_data_class().update_initial_data()
             # keep track that this app has been updated
             self.updated_apps.add(app)
 

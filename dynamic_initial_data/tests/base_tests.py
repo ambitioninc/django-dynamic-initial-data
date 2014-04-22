@@ -14,7 +14,7 @@ class BaseInitialDataTest(TestCase):
     def test_base_initial_data(self):
         initial_data = BaseInitialData()
         with self.assertRaises(NotImplementedError):
-            initial_data.update_static()
+            initial_data.update_initial_data()
 
 
 class InitialDataUpdaterTest(TestCase):
@@ -59,18 +59,18 @@ class InitialDataUpdaterTest(TestCase):
         with patch('dynamic_initial_data.base.InitialDataUpdater.get_class_path') as get_path_patch:
             get_path_patch.return_value = 'dynamic_initial_data.tests.mocks.MockInitialData'
 
-            # patch the update_static method so we make sure it is called
-            update_static_patcher = patch('dynamic_initial_data.tests.mocks.MockInitialData.update_static')
-            update_static_patch = update_static_patcher.start()
+            # patch the update_initial_data method so we make sure it is called
+            update_initial_data_patcher = patch('dynamic_initial_data.tests.mocks.MockInitialData.update_initial_data')
+            update_initial_data_patch = update_initial_data_patcher.start()
             initial_data_manager.update_app('dynamic_initial_data')
-            self.assertEqual(1, update_static_patch.call_count)
+            self.assertEqual(1, update_initial_data_patch.call_count)
 
             # make sure it doesn't call update static again
             initial_data_manager.update_app('dynamic_initial_data')
-            self.assertEqual(1, update_static_patch.call_count)
+            self.assertEqual(1, update_initial_data_patch.call_count)
 
             # stop the patcher
-            update_static_patcher.stop()
+            update_initial_data_patcher.stop()
 
             # make sure the app is in the updated_apps list
             self.assertIn('dynamic_initial_data', initial_data_manager.updated_apps)
@@ -90,18 +90,18 @@ class InitialDataUpdaterTest(TestCase):
         with patch('dynamic_initial_data.base.InitialDataUpdater.load_app') as load_app_patch:
             load_app_patch.side_effect = app_loader
 
-            # patch update_static methods
-            update_static_patcher1 = patch('dynamic_initial_data.tests.mocks.MockOne.update_static')
-            update_static_patcher2 = patch('dynamic_initial_data.tests.mocks.MockTwo.update_static')
-            update_static_patch1 = update_static_patcher1.start()
-            update_static_patch2 = update_static_patcher2.start()
+            # patch update_initial_data methods
+            update_initial_data_patcher1 = patch('dynamic_initial_data.tests.mocks.MockOne.update_initial_data')
+            update_initial_data_patcher2 = patch('dynamic_initial_data.tests.mocks.MockTwo.update_initial_data')
+            update_initial_data_patch1 = update_initial_data_patcher1.start()
+            update_initial_data_patch2 = update_initial_data_patcher2.start()
 
             initial_data_manager.update_app('MockTwo')
-            self.assertEqual(1, update_static_patch1.call_count)
-            self.assertEqual(1, update_static_patch2.call_count)
+            self.assertEqual(1, update_initial_data_patch1.call_count)
+            self.assertEqual(1, update_initial_data_patch2.call_count)
 
-            update_static_patcher1.stop()
-            update_static_patcher2.stop()
+            update_initial_data_patcher1.stop()
+            update_initial_data_patcher2.stop()
 
     def test_update_all_apps(self):
         """

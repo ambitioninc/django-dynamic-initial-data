@@ -41,8 +41,8 @@ directory. This will look like `{app_name}/fixtures/initial_data.py`. Don't forg
 the `__init__.py` file in the fixtures directory. `initial_data.py` must define a class `InitialData`
 that inherits from `BaseInitialData`.
 
-When apps are being initialized, each `InitialData` class is instantiated and `update_static` is called.
-If `update_static` is not implemented, then a `NotImplementedError` will be raised.
+When apps are being initialized, each `InitialData` class is instantiated and `update_initial_data` is called.
+If `update_initial_data` is not implemented, then a `NotImplementedError` will be raised.
 
 Any dependencies should be included in a list called `dependencies`. Each dependency is a string
 of the app name as defined in `INSTALLED_APPS`.
@@ -55,7 +55,7 @@ from dynamic_initial_data.base import BaseInitialData
 class InitialData(BaseInitialData):
     dependencies = ['my_first_app', 'my.second.app']
 
-    def update_static(self):
+    def update_initial_data(self):
         model_obj, created = TestModel.objects.upsert(int_field=5, defaults={'float_field': 2.0})
 
         TestModel.objects.bulk_upsert([
@@ -64,8 +64,8 @@ class InitialData(BaseInitialData):
             TestModel(float_field=3.0, char_field='3', int_field=3),
         ], ['int_field'], ['char_field'])
 ```
-In this example, the `update_static` method will be called for `my_first_app` (following any dependencies first),
-and then for `my.second.app`, before finally calling `update_static` on this class.
+In this example, the `update_initial_data` method will be called for `my_first_app` (following any dependencies first),
+and then for `my.second.app`, before finally calling `update_initial_data` on this class.
 
 Documentation on using `upsert` and `bulk_upsert` can be found below:
 - https://github.com/ambitioninc/django-manager-utils#upsert
