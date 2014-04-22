@@ -84,8 +84,8 @@ class InitialDataManager(object):
         if initial_data_class:
             self.log('Checking dependencies for {0}'.format(app))
 
-            # detect cycles and missing dependencies
-            dependencies = self.detect_dependency_cycles(app)
+            # get dependency list
+            dependencies = self.get_dependency_call_list(app)
 
             # update initial data of dependencies
             for dependency in dependencies[1:]:
@@ -105,10 +105,12 @@ class InitialDataManager(object):
         for app in settings.INSTALLED_APPS:
             self.update_app(app)
 
-    def detect_dependency_cycles(self, app, call_list=None):
+    def get_dependency_call_list(self, app, call_list=None):
         """
         Recursively detects any dependency cycles based on the specific app. A running list of
-        app calls is kept and passed to each function call.
+        app calls is kept and passed to each function call. If a circular dependency is detected
+        an `InitialDataCircularDependency` exception will be raised. If a dependency does not exist,
+        an `InitialDataMissingApp` exception will be raised.
         :param app: The name of the app in which to detect cycles. This should be the same path as defined
             in settings.INSTALLED_APPS
         :type app: str
@@ -126,7 +128,7 @@ class InitialDataManager(object):
                 if dep in call_list:
                     raise InitialDataCircularDependency(dep=dep, call_list=call_list)
                 else:
-                    self.detect_dependency_cycles(dep, call_list + [dep])
+                    self.get_dependency_call_list(dep, call_list + [dep])
             call_list += dependencies
         else:
             raise InitialDataMissingApp(dep=app)
