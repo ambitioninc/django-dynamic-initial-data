@@ -113,7 +113,7 @@ class InitialDataManagerTest(TestCase):
             initial_data_manager.update_all_apps()
             self.assertEqual(num_apps, update_app_patch.call_count)
 
-    def test_detect_dependency_cycles(self):
+    def test_get_dependency_call_list(self):
         """
         Makes sure that dependency cycles are found and raises an exception
         """
@@ -126,4 +126,4 @@ class InitialDataManagerTest(TestCase):
 
         initial_data_manager = InitialDataManager()
         with self.assertRaises(InitialDataMissingApp):
-            initial_data_manager.detect_dependency_cycles('fake')
+            initial_data_manager.get_dependency_call_list('fake')
