@@ -129,7 +129,7 @@ class InitialDataManager(object):
                     raise InitialDataCircularDependency(dep=dep, call_list=call_list)
                 else:
                     self.get_dependency_call_list(dep, call_list + [dep])
-            call_list += dependencies
+            call_list.extend(dependencies)
         else:
             raise InitialDataMissingApp(dep=app)
         return call_list[1:]
