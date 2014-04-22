@@ -3,7 +3,7 @@ from django.test import TestCase
 from mock import patch
 
 
-class SyncInitialDataTest(TestCase):
+class UpdateInitialDataTest(TestCase):
     """
     Tests each of the management commands
     """
