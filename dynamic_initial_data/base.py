@@ -88,7 +88,7 @@ class InitialDataManager(object):
             dependencies = self.get_dependency_call_list(app)
 
             # update initial data of dependencies
-            for dependency in dependencies[1:]:
+            for dependency in dependencies:
                 self.update_app(dependency)
 
             self.log('Updating app {0}'.format(app))
@@ -122,7 +122,7 @@ class InitialDataManager(object):
         # load the initial data class for the app
         initial_data_class = self.load_app(app)
         if initial_data_class:
-            dependencies = initial_data_class().dependencies
+            dependencies = initial_data_class.dependencies
             # loop through each dependency and check recursively for cycles
             for dep in dependencies:
                 if dep in call_list:
@@ -132,7 +132,7 @@ class InitialDataManager(object):
             call_list += dependencies
         else:
             raise InitialDataMissingApp(dep=app)
-        return call_list
+        return call_list[1:]
 
     def log(self, str):
         """
