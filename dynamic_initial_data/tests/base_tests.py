@@ -56,7 +56,7 @@ class InitialDataUpdaterTest(TestCase):
 
         # make sure app gets added to updated apps
         initial_data_manager = InitialDataUpdater()
-        with patch('dynamic_initial_data.base.InitialDataUpdater.get_class_path') as get_path_patch:
+        with patch('dynamic_initial_data.base.InitialDataUpdater.get_class_path', spec_set=True) as get_path_patch:
             get_path_patch.return_value = 'dynamic_initial_data.tests.mocks.MockInitialData'
 
             # patch the update_initial_data method so we make sure it is called
@@ -87,7 +87,7 @@ class InitialDataUpdaterTest(TestCase):
         app_loader(None)
 
         initial_data_manager = InitialDataUpdater()
-        with patch('dynamic_initial_data.base.InitialDataUpdater.load_app') as load_app_patch:
+        with patch('dynamic_initial_data.base.InitialDataUpdater.load_app', spec_set=True) as load_app_patch:
             load_app_patch.side_effect = app_loader
 
             # patch update_initial_data methods
@@ -108,7 +108,7 @@ class InitialDataUpdaterTest(TestCase):
         Verifies that update_app is called with all installed apps
         """
         num_apps = len(settings.INSTALLED_APPS)
-        with patch('dynamic_initial_data.base.InitialDataUpdater.update_app') as update_app_patch:
+        with patch('dynamic_initial_data.base.InitialDataUpdater.update_app', spec_set=True) as update_app_patch:
             initial_data_manager = InitialDataUpdater()
             initial_data_manager.update_all_apps()
             self.assertEqual(num_apps, update_app_patch.call_count)
@@ -118,7 +118,7 @@ class InitialDataUpdaterTest(TestCase):
         Makes sure that dependency cycles are found and raises an exception
         """
         initial_data_manager = InitialDataUpdater()
-        with patch('dynamic_initial_data.base.InitialDataUpdater.load_app') as load_app_patch:
+        with patch('dynamic_initial_data.base.InitialDataUpdater.load_app', spec_set=True) as load_app_patch:
             load_app_patch.return_value = MockThree
 
             with self.assertRaises(InitialDataCircularDependency):
