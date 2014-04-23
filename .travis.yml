@@ -10,7 +10,7 @@ install:
   - pip install -q coverage flake8 Django==$DJANGO
 before_script:
   - flake8 . --max-line-length=120 --max-complexity=10 --exclude='env,migrations,*.egg'
-  - psql -c 'CREATE DATABASE app_config;' -U postgres
+  - psql -c 'CREATE DATABASE dynamic_initial_data;' -U postgres
 script:
-  - coverage run --source='app_config' --branch --omit='app_config/migrations/*' setup.py test
+  - coverage run --source='dynamic_initial_data' --branch --omit='dynamic_initial_data/migrations/*' setup.py test
   - coverage report --fail-under=100 --show-missing
