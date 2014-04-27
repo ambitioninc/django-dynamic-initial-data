@@ -65,7 +65,17 @@ class InitialData(BaseInitialData):
         ], ['int_field'], ['char_field'])
 ```
 In this example, the `update_initial_data` method will be called for `my_first_app` (following any dependencies first),
-and then for `my.second.app`, before finally calling `update_initial_data` on this class.
+and then for `my.second.app`, before finally calling `update_initial_data` on this class. Again, this can be executed by calling
+
+```
+python manage.py update_initial_data
+```
+
+Similarly, to only initialize a single app, use
+
+```
+python manage.py update_initial_data --app 'app_path'
+```
 
 Documentation on using `upsert` and `bulk_upsert` can be found below:
 - https://github.com/ambitioninc/django-manager-utils#upsert
