@@ -74,7 +74,7 @@ python manage.py update_initial_data
 Similarly, to only initialize a single app, use
 
 ```
-python manage.py update_initial_data --app='app_path'
+python manage.py update_initial_data --app 'app_path'
 ```
 
 Documentation on using `upsert` and `bulk_upsert` can be found below:
