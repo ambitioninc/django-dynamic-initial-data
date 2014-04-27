@@ -10,10 +10,17 @@ class Command(BaseCommand):
         make_option(
             '--verbose', action='store_true', dest='verbose', default=False,
             help='Determines if we should display which apps are being updated'
-        ),)
+        ),
+        make_option(
+            '--app', dest='app', default=None, help='Updates a single app'
+        )
+    )
 
-    help = 'Call the AppInit.update command for all apps'
+    help = 'Call the InitialData.update_initial_data command for all apps. Use --app to update only one app.'
 
     def handle(self, *args, **options):
-        manager = InitialDataUpdater(options)
-        manager.update_all_apps()
+        updater = InitialDataUpdater(options)
+        if options['app']:
+            updater.update_app(options['app'])
+        else:
+            updater.update_all_apps()

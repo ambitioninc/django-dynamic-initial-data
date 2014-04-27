@@ -14,3 +14,13 @@ class UpdateInitialDataTest(TestCase):
         with patch('dynamic_initial_data.base.InitialDataUpdater.update_all_apps') as update_patch:
             call_command('update_initial_data')
             self.assertEqual(1, update_patch.call_count)
+
+    def test_app_argument(self):
+        """
+        Tests the management command with the --app argument. Verifies that it runs for only the
+        provided app.
+        """
+        with patch('dynamic_initial_data.base.InitialDataUpdater.update_app') as update_patch:
+            call_command('update_initial_data', app='app_path')
+            self.assertEqual(1, update_patch.call_count)
+            update_patch.assert_called_with('app_path')
