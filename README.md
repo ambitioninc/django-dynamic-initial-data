@@ -17,7 +17,7 @@ a planned feature.
 To install Django Dynamic Initial Data:
 
 ```shell
-pip install git+https://github.com/ambitioninc/django-dynamic-initial-data.git
+pip install django-dynamic-initial-data
 ```
 
 Add Django Dynamic Initial Data to your `INSTALLED_APPS` to get started:
@@ -25,7 +25,7 @@ Add Django Dynamic Initial Data to your `INSTALLED_APPS` to get started:
 settings.py
 ```python
 INSTALLED_APPS = (
-    'django-dynamic-initial-data',
+    'dynamic_initial_data',
 )
 ```
 
