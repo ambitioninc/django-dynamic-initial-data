@@ -122,7 +122,7 @@ class InitialDataUpdater(object):
 
             # Update the initial data of the app and gather any objects returned for deletion. Objects registered for
             # deletion can either be returned from the update_initial_data function or programmatically added with the
-            # regsiter_for_deletion function in the BaseInitialData class.
+            # register_for_deletion function in the BaseInitialData class.
             initial_data_instance = initial_data_class()
             model_objs_registered_for_deletion = initial_data_instance.update_initial_data() or []
             model_objs_registered_for_deletion.extend(initial_data_instance.get_model_objs_registered_for_deletion())
@@ -140,7 +140,7 @@ class InitialDataUpdater(object):
         each round of initial data processing. Any receipts that are from previous rounds and not the current
         round will be deleted.
         """
-        # Create receipts for every object regsitered for deletion
+        # Create receipts for every object registered for deletion
         now = datetime.utcnow()
         registered_for_deletion_receipts = [
             RegisteredForDeletionReceipt(
