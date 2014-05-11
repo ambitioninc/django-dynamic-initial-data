@@ -1,16 +1,12 @@
 import os
 
 from django.conf import settings
-import djcelery
 
 
 def configure_settings():
     """
     Configures settings for manage.py and for run_tests.py.
     """
-    # Set up celery
-    djcelery.setup_loader()
-
     if not settings.configured:
         # Determine the database settings depending on if a test_db var is set in CI mode or Nonet
         circle_ci = os.environ.get('CIRCLECI', None)
