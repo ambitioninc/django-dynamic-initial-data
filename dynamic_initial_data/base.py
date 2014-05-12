@@ -2,6 +2,7 @@ from datetime import datetime
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.db.transaction import atomic
 
 from dynamic_initial_data.exceptions import InitialDataCircularDependency, InitialDataMissingApp
 from dynamic_initial_data.models import RegisteredForDeletionReceipt
