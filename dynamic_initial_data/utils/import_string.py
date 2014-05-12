@@ -11,7 +11,7 @@ def import_string(module_string):
     file_name = parts[-2]
 
     try:
-        module_path = __import__(path,  globals(), locals(), [file_name])
+        module_path = __import__(path, globals(), locals(), [file_name])
     except ImportError:
         return None
 

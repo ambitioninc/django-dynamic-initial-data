@@ -1,10 +1,17 @@
+from datetime import datetime
+
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
+from django_dynamic_fixture import G
+from freezegun import freeze_time
 from mock import patch
 
 from dynamic_initial_data.base import BaseInitialData, InitialDataUpdater
 from dynamic_initial_data.exceptions import InitialDataMissingApp, InitialDataCircularDependency
+from dynamic_initial_data.models import RegisteredForDeletionReceipt
 from dynamic_initial_data.tests.mocks import MockInitialData, MockClass, MockOne, MockTwo, MockThree
+from dynamic_initial_data.tests.models import Account
 
 
 class BaseInitialDataTest(TestCase):
@@ -15,6 +22,128 @@ class BaseInitialDataTest(TestCase):
         initial_data = BaseInitialData()
         with self.assertRaises(NotImplementedError):
             initial_data.update_initial_data()
+
+    def test_register_for_deletion_one_arg(self):
+        """
+        Tests the register_for_deletion_function with one argument.
+        """
+        initial_data = BaseInitialData()
+        account = G(Account)
+        initial_data.register_for_deletion(account)
+        self.assertEquals(initial_data.get_model_objs_registered_for_deletion(), [account])
+
+    def test_register_for_deletion_multiple_args(self):
+        """
+        Tests the register_for_deletion_function with multiple arguments.
+        """
+        initial_data = BaseInitialData()
+        account1 = G(Account)
+        account2 = G(Account)
+        initial_data.register_for_deletion(account1, account2)
+        self.assertEquals(initial_data.get_model_objs_registered_for_deletion(), [account1, account2])
+
+
+class TestHandleDeletions(TestCase):
+    """
+    Tests the handle_deletions functionality in the InitialDataUpater class.
+    """
+    def setUp(self):
+        super(TestHandleDeletions, self).setUp()
+        self.initial_data_updater = InitialDataUpdater()
+
+    def test_handle_deletions_no_objs(self):
+        """
+        Tests when there are no objs to handle. The function should not raise any exceptions.
+        """
+        self.initial_data_updater.handle_deletions()
+
+    def test_create_one_obj(self):
+        """
+        Tests creating one object to handle for deletion.
+        """
+        account = G(Account)
+        self.initial_data_updater.model_objs_registered_for_deletion = [account]
+
+        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 0)
+        with freeze_time('2013-04-12'):
+            self.initial_data_updater.handle_deletions()
+        receipt = RegisteredForDeletionReceipt.objects.get()
+        self.assertEquals(receipt.model_obj_type, ContentType.objects.get_for_model(Account))
+        self.assertEquals(receipt.model_obj_id, account.id)
+        self.assertEquals(receipt.register_time, datetime(2013, 4, 12))
+
+    def test_create_delete_one_obj(self):
+        """
+        Tests creating one object to handle for deletion and then deleting it.
+        """
+        account = G(Account)
+        self.initial_data_updater.model_objs_registered_for_deletion = [account]
+
+        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 0)
+        with freeze_time('2013-04-12'):
+            self.initial_data_updater.handle_deletions()
+        receipt = RegisteredForDeletionReceipt.objects.get()
+        self.assertEquals(receipt.model_obj_type, ContentType.objects.get_for_model(Account))
+        self.assertEquals(receipt.model_obj_id, account.id)
+        self.assertEquals(receipt.register_time, datetime(2013, 4, 12))
+
+        # Now, don't register the object for deletion and run it again at a different time
+        self.initial_data_updater.model_objs_registered_for_deletion = []
+        with freeze_time('2013-04-12 05:00:00'):
+            self.initial_data_updater.handle_deletions()
+        # The object should be deleted, along with its receipt
+        self.assertEquals(Account.objects.count(), 0)
+        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 0)
+
+    def test_create_update_one_obj(self):
+        """
+        Tests creating one object to handle for deletion and then updating it.
+        """
+        account = G(Account)
+        self.initial_data_updater.model_objs_registered_for_deletion = [account]
+
+        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 0)
+        with freeze_time('2013-04-12'):
+            self.initial_data_updater.handle_deletions()
+        receipt = RegisteredForDeletionReceipt.objects.get()
+        self.assertEquals(receipt.model_obj_type, ContentType.objects.get_for_model(Account))
+        self.assertEquals(receipt.model_obj_id, account.id)
+        self.assertEquals(receipt.register_time, datetime(2013, 4, 12))
+
+        # Run the deletion handler again at a different time. It should not delete the object
+        with freeze_time('2013-04-12 05:00:00'):
+            self.initial_data_updater.handle_deletions()
+        # The object should not be deleted, along with its receipt
+        self.assertEquals(Account.objects.count(), 1)
+        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 1)
+        self.assertEquals(RegisteredForDeletionReceipt.objects.get().register_time, datetime(2013, 4, 12, 5))
+
+    def test_delete_already_deleted_obj(self):
+        """
+        Tests the case when an object that was registered for deletion has already been deleted.
+        """
+        account = G(Account)
+        self.initial_data_updater.model_objs_registered_for_deletion = [account]
+
+        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 0)
+        with freeze_time('2013-04-12'):
+            self.initial_data_updater.handle_deletions()
+        receipt = RegisteredForDeletionReceipt.objects.get()
+        self.assertEquals(receipt.model_obj_type, ContentType.objects.get_for_model(Account))
+        self.assertEquals(receipt.model_obj_id, account.id)
+        self.assertEquals(receipt.register_time, datetime(2013, 4, 12))
+
+        # Delete the model object. The receipt should still exist
+        account.delete()
+        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 1)
+
+        # Now, don't register the object for deletion and run it again at a different time
+        self.initial_data_updater.model_objs_registered_for_deletion = []
+        with freeze_time('2013-04-12 05:00:00'):
+            self.initial_data_updater.handle_deletions()
+        # The object should be deleted, along with its receipt
+        self.assertEquals(Account.objects.count(), 0)
+        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 0)
 
 
 class InitialDataUpdaterTest(TestCase):
