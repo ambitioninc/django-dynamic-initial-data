@@ -93,6 +93,7 @@ class InitialDataUpdater(object):
             self.loaded_apps[app] = initial_data_class
         return self.loaded_apps[app]
 
+    @atomic
     def update_app(self, app):
         """
         Loads and runs `update_initial_data` of the specified app. Any dependencies contained within the
@@ -159,6 +160,7 @@ class InitialDataUpdater(object):
                 receipt.model_obj.delete()
             receipt.delete()
 
+    @atomic
     def update_all_apps(self):
         """
         Loops through all app names contained in settings.INSTALLED_APPS and calls `update_app`
