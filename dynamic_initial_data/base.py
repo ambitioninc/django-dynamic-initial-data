@@ -1,6 +1,11 @@
+from datetime import datetime
+
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
+from django.db.transaction import atomic
 
 from dynamic_initial_data.exceptions import InitialDataCircularDependency, InitialDataMissingApp
+from dynamic_initial_data.models import RegisteredForDeletionReceipt
 from dynamic_initial_data.utils.import_string import import_string
 
 
@@ -14,6 +19,20 @@ class BaseInitialData(object):
         dependencies = ['my_app', 'my_other_app']
     """
     dependencies = []
+
+    def __init__(self):
+        # Keep track of any model objects that have been registered for deletion
+        self.model_objs_registered_for_deletion = []
+
+    def get_model_objs_registered_for_deletion(self):
+        return self.model_objs_registered_for_deletion
+
+    def register_for_deletion(self, *model_objs):
+        """
+        Registers model objects for deletion. This means the model object will be deleted from the system when it is
+        no longer being managed by the initial data process.
+        """
+        self.model_objs_registered_for_deletion.extend(model_objs)
 
     def update_initial_data(self, *args, **kwargs):
         """
@@ -29,10 +48,19 @@ class InitialDataUpdater(object):
     and running of initialization classes.
     """
     def __init__(self, options=None):
+        # Various options that can be passed to the initial data updater
         options = options or {}
         self.verbose = options.get('verbose', False)
+
+        # Apps that have been updated so far. This allows us to process dependencies on other app
+        # inits easier without performing redundant work
         self.updated_apps = set()
+
+        # A cache of the apps that have been imported for data initialization
         self.loaded_apps = {}
+
+        # A list of all models that have been registered for deletion
+        self.model_objs_registered_for_deletion = []
 
     def get_class_path(self, app):
         """
@@ -66,6 +94,7 @@ class InitialDataUpdater(object):
             self.loaded_apps[app] = initial_data_class
         return self.loaded_apps[app]
 
+    @atomic
     def update_app(self, app):
         """
         Loads and runs `update_initial_data` of the specified app. Any dependencies contained within the
@@ -93,17 +122,57 @@ class InitialDataUpdater(object):
 
             self.log('Updating app {0}'.format(app))
 
-            initial_data_class().update_initial_data()
+            # Update the initial data of the app and gather any objects returned for deletion. Objects registered for
+            # deletion can either be returned from the update_initial_data function or programmatically added with the
+            # register_for_deletion function in the BaseInitialData class.
+            initial_data_instance = initial_data_class()
+            model_objs_registered_for_deletion = initial_data_instance.update_initial_data() or []
+            model_objs_registered_for_deletion.extend(initial_data_instance.get_model_objs_registered_for_deletion())
+
+            # Add the objects to be deleted from the app to the global list of objects to be deleted.
+            self.model_objs_registered_for_deletion.extend(model_objs_registered_for_deletion)
+
             # keep track that this app has been updated
             self.updated_apps.add(app)
 
+    def handle_deletions(self):
+        """
+        Manages handling deletions of objects that were previously managed by the initial data process but no longer
+        managed. It does so by mantaining a list of receipts for model objects that are registered for deletion on
+        each round of initial data processing. Any receipts that are from previous rounds and not the current
+        round will be deleted.
+        """
+        # Create receipts for every object registered for deletion
+        now = datetime.utcnow()
+        registered_for_deletion_receipts = [
+            RegisteredForDeletionReceipt(
+                model_obj_type=ContentType.objects.get_for_model(model_obj), model_obj_id=model_obj.id,
+                register_time=now)
+            for model_obj in self.model_objs_registered_for_deletion
+        ]
+
+        # Do a bulk upsert on all of the receipts, updating their registration time.
+        RegisteredForDeletionReceipt.objects.bulk_upsert(
+            registered_for_deletion_receipts, ['model_obj_type_id', 'model_obj_id'], update_fields=['register_time'])
+
+        # Delete all receipts and their associated model objects that weren't updated
+        for receipt in RegisteredForDeletionReceipt.objects.exclude(register_time=now).prefetch_related('model_obj'):
+            if receipt.model_obj:
+                receipt.model_obj.delete()
+            receipt.delete()
+
+    @atomic
     def update_all_apps(self):
         """
         Loops through all app names contained in settings.INSTALLED_APPS and calls `update_app`
-        on each one.
+        on each one. Handles any object deletions that happened after all apps have been initialized.
         """
         for app in settings.INSTALLED_APPS:
             self.update_app(app)
+
+        # During update_app, all apps added model objects that were registered for deletion.
+        # Delete all objects that were previously managed by the initial data process
+        self.handle_deletions()
 
     def get_dependency_call_list(self, app, call_list=None):
         """

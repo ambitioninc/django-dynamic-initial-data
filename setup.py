@@ -20,12 +20,12 @@ def get_version():
 setup(
     name='django-dynamic-initial-data',
     version=get_version(),
-    description='',
+    description='Dynamic initial data fixtures for Django apps',
     long_description=open('README.md').read(),
-    url='',
+    url='https://github.com/ambitioninc/django-dynamic-initial-data',
     author='',
     author_email='opensource@ambition.com',
-    keywords='',
+    keywords='Django fixtures',
     packages=find_packages(),
     classifiers=[
         'Programming Language :: Python',
@@ -37,11 +37,13 @@ setup(
     license='MIT',
     install_requires=[
         'django>=1.6',
-        'django-manager-utils>=0.3.6',
+        'django-manager-utils>=0.3.9',
     ],
     tests_require=[
         'psycopg2',
+        'django-dynamic-fixture',
         'django-nose',
+        'freezegun',
         'south',
         'mock',
     ],
