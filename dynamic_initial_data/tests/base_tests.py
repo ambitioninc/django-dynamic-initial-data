@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
+from django.test.utils import override_settings
 from django_dynamic_fixture import G
 from freezegun import freeze_time
 from mock import patch
@@ -160,99 +160,102 @@ class InitialDataUpdaterTest(TestCase):
         # cover the branch that prints if verbose is true
         initial_data_manager.log('test')
 
-    def test_load_app(self):
+    @patch('dynamic_initial_data.base.import_by_path', return_value=MockInitialData)
+    def test_load_app_exists(self, import_patch):
         """
-        Tests the load_app method
+        Tests the load_app method on an app that exists
         """
-        with patch('dynamic_initial_data.base.import_string') as import_patch:
-            import_patch.return_value = MockInitialData
-            initial_data_manager = InitialDataUpdater()
-            self.assertEqual(MockInitialData, initial_data_manager.load_app('fake'))
+        self.assertEqual(MockInitialData, InitialDataUpdater().load_app('fake'))
 
-            # try to load an app that doesn't exist
-            initial_data_manager = InitialDataUpdater()
-            import_patch.return_value = MockClass
-            self.assertIsNone(initial_data_manager.load_app('fake'))
+    @patch('dynamic_initial_data.base.import_by_path', return_value=MockInitialData)
+    def test_load_app_cached(self, import_patch):
+        """
+        Tests that the cache is hit since import is only called once.
+        """
+        initial_data_updater = InitialDataUpdater()
+        initial_data_updater.load_app('fake')
+        initial_data_updater.load_app('fake')
+        initial_data_updater.load_app('fake')
+        self.assertEquals(import_patch.call_count, 1)
 
-    def test_update_app(self):
+    @patch('dynamic_initial_data.base.import_by_path', return_value=MockClass)
+    def test_load_app_doesnt_exist(self, import_patch):
         """
-        Tests the update_app method
+        Tests the load_app method on an app that doesnt exist
         """
-        # an error should only be raised for missing dependencies and not for directly
-        # calling update on an app that doesn't have an initial data file
+        self.assertIsNone(InitialDataUpdater().load_app('fake'))
+
+    @patch.object(InitialDataUpdater, 'load_app', return_value=MockInitialData, set_spec=True)
+    def test_update_app_no_errors_raised(self, mock_load_app):
+        """
+        Tests the update_app method. No errors should be raised since it has all of the required
+        components
+        """
+        InitialDataUpdater().update_app('fake')
+
+    def test_update_app_cant_load_initial_data(self):
+        """
+        Tests when the initial data class can't be loaded. It should still execute
+        """
+        InitialDataUpdater().update_app('bad_app_path')
+
+    @patch.object(InitialDataUpdater, 'load_app', return_value=MockInitialData, set_spec=True)
+    @patch('dynamic_initial_data.tests.mocks.MockInitialData.update_initial_data', set_spec=True)
+    def test_update_app_cached_updated_apps(self, update_initial_data_patch, mock_load_app):
+        """
+        Tests that the app gets added to updated apps and it is cached
+        """
         initial_data_manager = InitialDataUpdater()
-        initial_data_manager.update_app('fake')
+        initial_data_manager.update_app('dynamic_initial_data')
+        self.assertEqual(1, update_initial_data_patch.call_count)
 
-        # make sure app gets added to updated apps
-        initial_data_manager = InitialDataUpdater()
-        with patch('dynamic_initial_data.base.InitialDataUpdater.get_class_path', spec_set=True) as get_path_patch:
-            get_path_patch.return_value = 'dynamic_initial_data.tests.mocks.MockInitialData'
+        # make sure it doesn't call update static again
+        initial_data_manager.update_app('dynamic_initial_data')
+        self.assertEqual(1, update_initial_data_patch.call_count)
 
-            # patch the update_initial_data method so we make sure it is called
-            update_initial_data_patcher = patch('dynamic_initial_data.tests.mocks.MockInitialData.update_initial_data')
-            update_initial_data_patch = update_initial_data_patcher.start()
-            initial_data_manager.update_app('dynamic_initial_data')
-            self.assertEqual(1, update_initial_data_patch.call_count)
+        # make sure the app is in the updated_apps list
+        self.assertIn('dynamic_initial_data', initial_data_manager.updated_apps)
 
-            # make sure it doesn't call update static again
-            initial_data_manager.update_app('dynamic_initial_data')
-            self.assertEqual(1, update_initial_data_patch.call_count)
-
-            # stop the patcher
-            update_initial_data_patcher.stop()
-
-            # make sure the app is in the updated_apps list
-            self.assertIn('dynamic_initial_data', initial_data_manager.updated_apps)
-
+    @patch('dynamic_initial_data.tests.mocks.MockOne.update_initial_data', set_spec=True)
+    @patch('dynamic_initial_data.tests.mocks.MockTwo.update_initial_data', set_spec=True)
+    def test_update_app_dependencies(self, update_initial_data_patch2, update_initial_data_patch1):
+        """
+        Tests the update_app method when there are dependencies.
+        """
         # test dependencies
         def app_loader(app):
             if app == 'MockOne':
                 return MockOne
-            elif app == 'MockTwo':
+            else:
                 return MockTwo
-            return None
 
-        # coverage
-        app_loader(None)
-
-        initial_data_manager = InitialDataUpdater()
-        with patch('dynamic_initial_data.base.InitialDataUpdater.load_app', spec_set=True) as load_app_patch:
-            load_app_patch.side_effect = app_loader
-
-            # patch update_initial_data methods
-            update_initial_data_patcher1 = patch('dynamic_initial_data.tests.mocks.MockOne.update_initial_data')
-            update_initial_data_patcher2 = patch('dynamic_initial_data.tests.mocks.MockTwo.update_initial_data')
-            update_initial_data_patch1 = update_initial_data_patcher1.start()
-            update_initial_data_patch2 = update_initial_data_patcher2.start()
-
-            initial_data_manager.update_app('MockTwo')
+        with patch.object(InitialDataUpdater, 'load_app', side_effect=app_loader, spec_set=True):
+            InitialDataUpdater().update_app('MockTwo')
             self.assertEqual(1, update_initial_data_patch1.call_count)
             self.assertEqual(1, update_initial_data_patch2.call_count)
 
-            update_initial_data_patcher1.stop()
-            update_initial_data_patcher2.stop()
-
-    def test_update_all_apps(self):
+    @override_settings(INSTALLED_APPS=('hello', 'world',))
+    @patch('dynamic_initial_data.base.InitialDataUpdater.update_app', spec_set=True)
+    def test_update_all_apps(self, update_app_patch):
         """
         Verifies that update_app is called with all installed apps
         """
-        num_apps = len(settings.INSTALLED_APPS)
-        with patch('dynamic_initial_data.base.InitialDataUpdater.update_app', spec_set=True) as update_app_patch:
-            initial_data_manager = InitialDataUpdater()
-            initial_data_manager.update_all_apps()
-            self.assertEqual(num_apps, update_app_patch.call_count)
-
-    def test_get_dependency_call_list(self):
-        """
-        Makes sure that dependency cycles are found and raises an exception
-        """
         initial_data_manager = InitialDataUpdater()
-        with patch('dynamic_initial_data.base.InitialDataUpdater.load_app', spec_set=True) as load_app_patch:
-            load_app_patch.return_value = MockThree
+        initial_data_manager.update_all_apps()
+        self.assertEqual(2, update_app_patch.call_count)
 
-            with self.assertRaises(InitialDataCircularDependency):
-                initial_data_manager.update_app('MockThree')
+    @patch('dynamic_initial_data.base.InitialDataUpdater.load_app', return_value=MockThree, spec_set=True)
+    def test_get_dependency_call_list_circular_dependency(self, load_app_patch):
+        """
+        Tests when a circular dependency is found
+        """
+        with self.assertRaises(InitialDataCircularDependency):
+            InitialDataUpdater().update_app('MockThree')
 
-        initial_data_manager = InitialDataUpdater()
+    @patch('dynamic_initial_data.base.InitialDataUpdater.load_app', return_value=None, spec_set=True)
+    def test_get_dependency_call_list_initial_data_missing(self, load_app_patch):
+        """
+        Tests when the initial data is missing.
+        """
         with self.assertRaises(InitialDataMissingApp):
-            initial_data_manager.get_dependency_call_list('fake')
+            InitialDataUpdater().get_dependency_call_list('fake')
