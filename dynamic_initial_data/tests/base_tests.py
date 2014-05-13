@@ -252,8 +252,7 @@ class InitialDataUpdaterTest(TestCase):
         with self.assertRaises(InitialDataCircularDependency):
             InitialDataUpdater().update_app('MockThree')
 
-    @patch('dynamic_initial_data.base.InitialDataUpdater.load_app', return_value=None, spec_set=True)
-    def test_get_dependency_call_list_initial_data_missing(self, load_app_patch):
+    def test_get_dependency_call_list_initial_data_missing(self):
         """
         Tests when the initial data is missing.
         """
