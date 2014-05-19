@@ -185,7 +185,7 @@ class InitialDataUpdaterTest(TestCase):
         """
         self.assertIsNone(InitialDataUpdater().load_app('fake'))
 
-    @patch.object(InitialDataUpdater, 'load_app', return_value=MockInitialData, set_spec=True)
+    @patch.object(InitialDataUpdater, 'load_app', return_value=MockInitialData, spec_set=True)
     def test_update_app_no_errors_raised(self, mock_load_app):
         """
         Tests the update_app method. No errors should be raised since it has all of the required
@@ -199,8 +199,8 @@ class InitialDataUpdaterTest(TestCase):
         """
         InitialDataUpdater().update_app('bad_app_path')
 
-    @patch.object(InitialDataUpdater, 'load_app', return_value=MockInitialData, set_spec=True)
-    @patch('dynamic_initial_data.tests.mocks.MockInitialData.update_initial_data', set_spec=True)
+    @patch.object(InitialDataUpdater, 'load_app', return_value=MockInitialData, spec_set=True)
+    @patch('dynamic_initial_data.tests.mocks.MockInitialData.update_initial_data', spec_set=True)
     def test_update_app_cached_updated_apps(self, update_initial_data_patch, mock_load_app):
         """
         Tests that the app gets added to updated apps and it is cached
@@ -216,8 +216,8 @@ class InitialDataUpdaterTest(TestCase):
         # make sure the app is in the updated_apps list
         self.assertIn('dynamic_initial_data', initial_data_manager.updated_apps)
 
-    @patch('dynamic_initial_data.tests.mocks.MockOne.update_initial_data', set_spec=True)
-    @patch('dynamic_initial_data.tests.mocks.MockTwo.update_initial_data', set_spec=True)
+    @patch('dynamic_initial_data.tests.mocks.MockOne.update_initial_data', spec_set=True)
+    @patch('dynamic_initial_data.tests.mocks.MockTwo.update_initial_data', spec_set=True)
     def test_update_app_dependencies(self, update_initial_data_patch2, update_initial_data_patch1):
         """
         Tests the update_app method when there are dependencies.
