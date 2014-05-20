@@ -2,11 +2,12 @@ from datetime import datetime
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ImproperlyConfigured
 from django.db.transaction import atomic
+from django.utils.module_loading import import_by_path
 
 from dynamic_initial_data.exceptions import InitialDataCircularDependency, InitialDataMissingApp
 from dynamic_initial_data.models import RegisteredForDeletionReceipt
-from dynamic_initial_data.utils.import_string import import_string
 
 
 class BaseInitialData(object):
@@ -88,10 +89,14 @@ class InitialDataUpdater(object):
             return self.loaded_apps.get(app)
 
         self.loaded_apps[app] = None
-        initial_data_class = import_string(self.get_class_path(app))
-        if initial_data_class and issubclass(initial_data_class, BaseInitialData):
-            self.log('Loaded app {0}'.format(app))
-            self.loaded_apps[app] = initial_data_class
+        try:
+            initial_data_class = import_by_path(self.get_class_path(app))
+            if issubclass(initial_data_class, BaseInitialData):
+                self.log('Loaded app {0}'.format(app))
+                self.loaded_apps[app] = initial_data_class
+        except ImproperlyConfigured:
+            pass
+
         return self.loaded_apps[app]
 
     @atomic
@@ -188,6 +193,7 @@ class InitialDataUpdater(object):
         """
         # start the call_list with the current app if one wasn't passed in recursively
         call_list = call_list or [app]
+
         # load the initial data class for the app
         initial_data_class = self.load_app(app)
         if initial_data_class:
@@ -201,6 +207,7 @@ class InitialDataUpdater(object):
             call_list.extend(dependencies)
         else:
             raise InitialDataMissingApp(dep=app)
+
         return call_list[1:]
 
     def log(self, str):
