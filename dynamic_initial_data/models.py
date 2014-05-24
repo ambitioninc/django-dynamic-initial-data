@@ -19,3 +19,6 @@ class RegisteredForDeletionReceipt(models.Model):
 
     # Use manager utils for bulk updating capabilities
     objects = ManagerUtilsManager()
+
+    class Meta:
+        unique_together = ('model_obj_type', 'model_obj_id')

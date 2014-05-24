@@ -8,7 +8,8 @@ class MockClass(object):
 
 
 class MockInitialData(BaseInitialData):
-    pass
+    def update_initial_data(self):
+        pass
 
 
 class MockOne(BaseInitialData):
