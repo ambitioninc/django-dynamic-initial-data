@@ -151,7 +151,8 @@ class InitialDataUpdater(object):
         now = datetime.utcnow()
         registered_for_deletion_receipts = [
             RegisteredForDeletionReceipt(
-                model_obj_type=ContentType.objects.get_for_model(model_obj), model_obj_id=model_obj.id,
+                model_obj_type=ContentType.objects.get_for_model(model_obj, for_concrete_model=False),
+                model_obj_id=model_obj.id,
                 register_time=now)
             for model_obj in set(self.model_objs_registered_for_deletion)
         ]

@@ -11,7 +11,7 @@ from dynamic_initial_data.base import BaseInitialData, InitialDataUpdater
 from dynamic_initial_data.exceptions import InitialDataMissingApp, InitialDataCircularDependency
 from dynamic_initial_data.models import RegisteredForDeletionReceipt
 from dynamic_initial_data.tests.mocks import MockInitialData, MockClass, MockOne, MockTwo, MockThree
-from dynamic_initial_data.tests.models import Account
+from dynamic_initial_data.tests.models import Account, ProxyAccount
 
 
 class BaseInitialDataTest(TestCase):
@@ -85,6 +85,31 @@ class TestHandleDeletions(TestCase):
         receipt = RegisteredForDeletionReceipt.objects.get()
         self.assertEquals(receipt.model_obj_type, ContentType.objects.get_for_model(Account))
         self.assertEquals(receipt.model_obj_id, account.id)
+        self.assertEquals(receipt.register_time, datetime(2013, 4, 12))
+
+    def test_create_dup_proxy_objs(self):
+        """
+        Tests creating duplicate objects for deletion when one is a proxy of another.
+        """
+        account = G(Account)
+        proxy_account = ProxyAccount.objects.get(id=account.id)
+        self.initial_data_updater.model_objs_registered_for_deletion = [account, account, proxy_account]
+
+        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 0)
+        with freeze_time('2013-04-12'):
+            self.initial_data_updater.handle_deletions()
+        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 2)
+
+        receipt = RegisteredForDeletionReceipt.objects.get(model_obj_type=ContentType.objects.get_for_model(account))
+        self.assertEquals(receipt.model_obj_type, ContentType.objects.get_for_model(Account))
+        self.assertEquals(receipt.model_obj_id, account.id)
+        self.assertEquals(receipt.register_time, datetime(2013, 4, 12))
+
+        receipt = RegisteredForDeletionReceipt.objects.get(
+            model_obj_type=ContentType.objects.get_for_model(proxy_account, for_concrete_model=False))
+        self.assertEquals(
+            receipt.model_obj_type, ContentType.objects.get_for_model(ProxyAccount, for_concrete_model=False))
+        self.assertEquals(receipt.model_obj_id, proxy_account.id)
         self.assertEquals(receipt.register_time, datetime(2013, 4, 12))
 
     def test_create_delete_one_obj(self):
