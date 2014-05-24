@@ -72,6 +72,21 @@ class TestHandleDeletions(TestCase):
         self.assertEquals(receipt.model_obj_id, account.id)
         self.assertEquals(receipt.register_time, datetime(2013, 4, 12))
 
+    def test_create_dup_objs(self):
+        """
+        Tests creating duplicate objects for deletion.
+        """
+        account = G(Account)
+        self.initial_data_updater.model_objs_registered_for_deletion = [account, account]
+
+        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 0)
+        with freeze_time('2013-04-12'):
+            self.initial_data_updater.handle_deletions()
+        receipt = RegisteredForDeletionReceipt.objects.get()
+        self.assertEquals(receipt.model_obj_type, ContentType.objects.get_for_model(Account))
+        self.assertEquals(receipt.model_obj_id, account.id)
+        self.assertEquals(receipt.register_time, datetime(2013, 4, 12))
+
     def test_create_delete_one_obj(self):
         """
         Tests creating one object to handle for deletion and then deleting it.

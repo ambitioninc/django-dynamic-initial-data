@@ -32,6 +32,31 @@ class IntegrationTest(TestCase):
         self.assertEquals(Account.objects.count(), 1)
 
     @override_settings(INSTALLED_APPS=('one_installed_test_app',))
+    def test_multiple_same_objects(self):
+        """
+        Tests initial data when registering the same object for deletion twice.
+        """
+        class AccountInitialData1(BaseInitialData):
+            """
+            Initial data code that registers the same object many times for deletion
+            """
+            def update_initial_data(self):
+                # Return the object from update_initial_data, thus registering it for deletion
+                account = Account.objects.get_or_create()[0]
+                return [account, account, account]
+
+        # Verify no account objects exist
+        self.assertEquals(Account.objects.count(), 0)
+
+        with patch.object(InitialDataUpdater, 'load_app', return_value=AccountInitialData1):
+            InitialDataUpdater().update_all_apps()
+            InitialDataUpdater().update_all_apps()
+
+        # Verify an account object was created and is managed by a deletion receipt
+        self.assertEquals(Account.objects.count(), 1)
+        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 1)
+
+    @override_settings(INSTALLED_APPS=('one_installed_test_app',))
     def test_handle_deletions_returned_from_update_initial_data(self):
         """
         Tests handling of deletions when they are returned from the update_initial_data function.
