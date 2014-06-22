@@ -2,7 +2,8 @@ from datetime import datetime
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
-from django.test import TestCase
+from django.db import transaction
+from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
 from django_dynamic_fixture import G
 from freezegun import freeze_time
@@ -12,7 +13,7 @@ from dynamic_initial_data.base import BaseInitialData, InitialDataUpdater
 from dynamic_initial_data.exceptions import InitialDataMissingApp, InitialDataCircularDependency
 from dynamic_initial_data.models import RegisteredForDeletionReceipt
 from dynamic_initial_data.tests.mocks import MockInitialData, MockClass, MockOne, MockTwo, MockThree
-from dynamic_initial_data.tests.models import Account, ProxyAccount
+from dynamic_initial_data.tests.models import Account, ProxyAccount, CantCascadeModel, RelModel
 
 
 class BaseInitialDataTest(TestCase):
@@ -42,6 +43,27 @@ class BaseInitialDataTest(TestCase):
         account2 = G(Account)
         initial_data.register_for_deletion(account1, account2)
         self.assertEquals(initial_data.get_model_objs_registered_for_deletion(), [account1, account2])
+
+
+class TestInvalidDeletions(TransactionTestCase):
+    def test_cant_delete_obj_in_receipt(self):
+        """
+        Tests when the object in the receipt cant be deleted such as a deleted content type
+        or another model that cant be cascaded.
+        """
+        initial_data_updater = InitialDataUpdater()
+        rel_model = G(RelModel)
+        G(CantCascadeModel, rel_model=rel_model)
+        RegisteredForDeletionReceipt.objects.create(model_obj=rel_model, register_time=datetime(2013, 4, 5))
+
+        account = G(Account)
+        RegisteredForDeletionReceipt.objects.create(model_obj=account, register_time=datetime(2013, 4, 5))
+        initial_data_updater.model_objs_registered_for_deletion = []
+
+        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 2)
+        with transaction.atomic():
+            initial_data_updater.handle_deletions()
+        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 0)
 
 
 class TestHandleDeletions(TestCase):

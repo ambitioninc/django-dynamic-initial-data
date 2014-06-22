@@ -112,30 +112,29 @@ class InitialDataUpdater(object):
 
         # load the initial data class
         initial_data_class = self.load_app(app)
-        if initial_data_class:
-            self.log('Checking dependencies for {0}'.format(app))
+        self.log('Checking dependencies for {0}'.format(app))
 
-            # get dependency list
-            dependencies = self.get_dependency_call_list(app)
+        # get dependency list
+        dependencies = self.get_dependency_call_list(app)
 
-            # update initial data of dependencies
-            for dependency in dependencies:
-                self.update_app(dependency)
+        # update initial data of dependencies
+        for dependency in dependencies:
+            self.update_app(dependency)
 
-            self.log('Updating app {0}'.format(app))
+        self.log('Updating app {0}'.format(app))
 
-            # Update the initial data of the app and gather any objects returned for deletion. Objects registered for
-            # deletion can either be returned from the update_initial_data function or programmatically added with the
-            # register_for_deletion function in the BaseInitialData class.
-            initial_data_instance = initial_data_class()
-            model_objs_registered_for_deletion = initial_data_instance.update_initial_data() or []
-            model_objs_registered_for_deletion.extend(initial_data_instance.get_model_objs_registered_for_deletion())
+        # Update the initial data of the app and gather any objects returned for deletion. Objects registered for
+        # deletion can either be returned from the update_initial_data function or programmatically added with the
+        # register_for_deletion function in the BaseInitialData class.
+        initial_data_instance = initial_data_class()
+        model_objs_registered_for_deletion = initial_data_instance.update_initial_data() or []
+        model_objs_registered_for_deletion.extend(initial_data_instance.get_model_objs_registered_for_deletion())
 
-            # Add the objects to be deleted from the app to the global list of objects to be deleted.
-            self.model_objs_registered_for_deletion.extend(model_objs_registered_for_deletion)
+        # Add the objects to be deleted from the app to the global list of objects to be deleted.
+        self.model_objs_registered_for_deletion.extend(model_objs_registered_for_deletion)
 
-            # keep track that this app has been updated
-            self.updated_apps.add(app)
+        # keep track that this app has been updated
+        self.updated_apps.add(app)
 
     def handle_deletions(self):
         """
@@ -160,8 +159,12 @@ class InitialDataUpdater(object):
 
         # Delete all receipts and their associated model objects that weren't updated
         for receipt in RegisteredForDeletionReceipt.objects.exclude(register_time=now).prefetch_related('model_obj'):
-            if receipt.model_obj:
+            try:
                 receipt.model_obj.delete()
+            except:
+                # The model object may no longer be there, its ctype may be invalid, or it might be protected.
+                # Regardless, the model object cannot be deleted, so go ahead and delete its receipt.
+                pass
             receipt.delete()
 
     @atomic
