@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase
 from django.test.utils import override_settings
 from django_dynamic_fixture import G
@@ -235,9 +236,10 @@ class InitialDataUpdaterTest(TestCase):
 
     def test_update_app_cant_load_initial_data(self):
         """
-        Tests when the initial data class can't be loaded. It should still execute
+        Tests when the initial data class can't be loaded. It should raise ImproperlyConfigure
         """
-        InitialDataUpdater().update_app('bad_app_path')
+        with self.assertRaises(ImproperlyConfigured):
+            InitialDataUpdater().update_app('bad_app_path')
 
     @patch.object(InitialDataUpdater, 'load_app', return_value=MockInitialData, spec_set=True)
     @patch('dynamic_initial_data.tests.mocks.MockInitialData.update_initial_data', spec_set=True)

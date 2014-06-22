@@ -89,13 +89,10 @@ class InitialDataUpdater(object):
             return self.loaded_apps.get(app)
 
         self.loaded_apps[app] = None
-        try:
-            initial_data_class = import_by_path(self.get_class_path(app))
-            if issubclass(initial_data_class, BaseInitialData):
-                self.log('Loaded app {0}'.format(app))
-                self.loaded_apps[app] = initial_data_class
-        except ImproperlyConfigured:
-            pass
+        initial_data_class = import_by_path(self.get_class_path(app))
+        if issubclass(initial_data_class, BaseInitialData):
+            self.log('Loaded app {0}'.format(app))
+            self.loaded_apps[app] = initial_data_class
 
         return self.loaded_apps[app]
 
@@ -196,18 +193,19 @@ class InitialDataUpdater(object):
         call_list = call_list or [app]
 
         # load the initial data class for the app
-        initial_data_class = self.load_app(app)
-        if initial_data_class:
-            dependencies = initial_data_class.dependencies
-            # loop through each dependency and check recursively for cycles
-            for dep in dependencies:
-                if dep in call_list:
-                    raise InitialDataCircularDependency(dep=dep, call_list=call_list)
-                else:
-                    self.get_dependency_call_list(dep, call_list + [dep])
-            call_list.extend(dependencies)
-        else:
+        try:
+            initial_data_class = self.load_app(app)
+        except ImproperlyConfigured:
             raise InitialDataMissingApp(dep=app)
+
+        dependencies = initial_data_class.dependencies
+        # loop through each dependency and check recursively for cycles
+        for dep in dependencies:
+            if dep in call_list:
+                raise InitialDataCircularDependency(dep=dep, call_list=call_list)
+            else:
+                self.get_dependency_call_list(dep, call_list + [dep])
+        call_list.extend(dependencies)
 
         return call_list[1:]
 
