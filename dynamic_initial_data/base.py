@@ -111,7 +111,12 @@ class InitialDataUpdater(object):
             return
 
         # load the initial data class
-        initial_data_class = self.load_app(app)
+        try:
+            initial_data_class = self.load_app(app)
+        except ImproperlyConfigured:
+            self.log('Could not load {0}'.format(app))
+            return
+
         self.log('Checking dependencies for {0}'.format(app))
 
         # get dependency list
