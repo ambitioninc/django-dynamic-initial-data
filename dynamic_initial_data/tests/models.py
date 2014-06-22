@@ -14,3 +14,11 @@ class ProxyAccount(Account):
     """
     class Meta:
         proxy = True
+
+
+class RelModel(models.Model):
+    pass
+
+
+class CantCascadeModel(models.Model):
+    rel_model = models.ForeignKey(RelModel, on_delete=models.PROTECT)
