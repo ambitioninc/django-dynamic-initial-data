@@ -163,7 +163,7 @@ class InitialDataUpdater(object):
             registered_for_deletion_receipts, ['model_obj_type_id', 'model_obj_id'], update_fields=['register_time'])
 
         # Delete all receipts and their associated model objects that weren't updated
-        for receipt in RegisteredForDeletionReceipt.objects.exclude(register_time=now).prefetch_related('model_obj'):
+        for receipt in RegisteredForDeletionReceipt.objects.exclude(register_time=now):
             try:
                 receipt.model_obj.delete()
             except:
