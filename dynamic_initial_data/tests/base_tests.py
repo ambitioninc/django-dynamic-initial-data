@@ -296,7 +296,7 @@ class InitialDataUpdaterTest(TestCase):
             self.assertEqual(1, update_initial_data_patch1.call_count)
             self.assertEqual(1, update_initial_data_patch2.call_count)
 
-    @override_settings(INSTALLED_APPS=('hello', 'world',))
+    @override_settings(INSTALLED_APPS=('django.contrib.auth', 'django.contrib.admin',))
     @patch('dynamic_initial_data.base.InitialDataUpdater.update_app', spec_set=True)
     def test_update_all_apps(self, update_app_patch):
         """

@@ -148,6 +148,15 @@ class InitialDataUpdater(object):
         each round of initial data processing. Any receipts that are from previous rounds and not the current
         round will be deleted.
         """
+
+        deduplicated_objs = {}
+        for model in self.model_objs_registered_for_deletion:
+            key = '{0}:{1}'.format(
+                ContentType.objects.get_for_model(model, for_concrete_model=False),
+                model.id
+            )
+            deduplicated_objs[key] = model
+
         # Create receipts for every object registered for deletion
         now = datetime.utcnow()
         registered_for_deletion_receipts = [
@@ -155,7 +164,7 @@ class InitialDataUpdater(object):
                 model_obj_type=ContentType.objects.get_for_model(model_obj, for_concrete_model=False),
                 model_obj_id=model_obj.id,
                 register_time=now)
-            for model_obj in set(self.model_objs_registered_for_deletion)
+            for model_obj in deduplicated_objs.values()
         ]
 
         # Do a bulk upsert on all of the receipts, updating their registration time.
@@ -217,10 +226,10 @@ class InitialDataUpdater(object):
 
         return call_list[1:]
 
-    def log(self, str):
+    def log(self, log):
         """
         Convenient way to output data and maintain coverage without having if-statements scattered throughout
         the code base with duplicate tests to test the verbose branches
         """
         if self.verbose:
-            print str
+            print(log)
