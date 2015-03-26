@@ -1,5 +1,6 @@
 import os
 
+import django
 from django.conf import settings
 
 
@@ -27,19 +28,22 @@ def configure_settings():
         else:
             raise RuntimeError('Unsupported test DB {0}'.format(test_db))
 
+        installed_apps = [
+            'django.contrib.auth',
+            'django.contrib.contenttypes',
+            'django.contrib.sessions',
+            'django.contrib.admin',
+            'dynamic_initial_data',
+            'dynamic_initial_data.tests',
+        ]
+        if django.VERSION[1] < 7:
+            installed_apps.append('south')
         settings.configure(
             DATABASES={
                 'default': db_config,
             },
-            INSTALLED_APPS=(
-                'django.contrib.auth',
-                'django.contrib.contenttypes',
-                'django.contrib.sessions',
-                'django.contrib.admin',
-                'south',
-                'dynamic_initial_data',
-                'dynamic_initial_data.tests',
-            ),
+            MIDDLEWARE_CLASSES={},
+            INSTALLED_APPS=installed_apps,
             ROOT_URLCONF='dynamic_initial_data.urls',
             DEBUG=False,
             DDF_FILL_NULLABLE_FIELDS=False,
