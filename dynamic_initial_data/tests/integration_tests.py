@@ -31,7 +31,6 @@ class IntegrationTest(TestCase):
         # Verify an account object was created
         self.assertEquals(Account.objects.count(), 1)
 
-    @override_settings(INSTALLED_APPS=('one_installed_test_app',))
     def test_multiple_same_objects(self):
         """
         Tests initial data when registering the same object for deletion twice.
@@ -56,7 +55,6 @@ class IntegrationTest(TestCase):
         self.assertEquals(Account.objects.count(), 1)
         self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 1)
 
-    @override_settings(INSTALLED_APPS=('one_installed_test_app',))
     def test_handle_deletions_returned_from_update_initial_data(self):
         """
         Tests handling of deletions when they are returned from the update_initial_data function.
@@ -97,7 +95,6 @@ class IntegrationTest(TestCase):
         self.assertEquals(Account.objects.count(), 0)
         self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 0)
 
-    @override_settings(INSTALLED_APPS=('one_installed_test_app',))
     def test_handle_deletions_updates_returned_from_update_initial_data(self):
         """
         Tests handling of deletions and updates when they are returned from the update_initial_data function.
@@ -137,7 +134,6 @@ class IntegrationTest(TestCase):
         self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 1)
         self.assertEquals(RegisteredForDeletionReceipt.objects.get().model_obj.name, 'hi')
 
-    @override_settings(INSTALLED_APPS=('one_installed_test_app',))
     def test_handle_deletions_registered_from_update_initial_data(self):
         """
         Tests handling of deletions when they are programmatically registered from the update_initial_data function.
@@ -178,7 +174,6 @@ class IntegrationTest(TestCase):
         self.assertEquals(Account.objects.count(), 0)
         self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 0)
 
-    @override_settings(INSTALLED_APPS=('one_installed_test_app',))
     def test_handle_deletions_updates_registered_from_update_initial_data(self):
         """
         Tests handling of deletions and updates when they are registered from the update_initial_data function.
