@@ -38,15 +38,14 @@ setup(
     ],
     license='MIT',
     install_requires=[
-        'django>=1.6',
-        'django-manager-utils>=0.6.4',
+        'django>=1.7',
+        'django-manager-utils>=0.8.1',
     ],
     tests_require=[
         'psycopg2',
         'django-dynamic-fixture',
-        'django-nose',
+        'django-nose>=1.4',
         'freezegun',
-        'south>=1.0.2',
         'mock',
     ],
     test_suite='run_tests.run_tests',
