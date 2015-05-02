@@ -2,9 +2,7 @@
 branch = True
 omit =
     */migrations/*
-    */south_migrations/*
     dynamic_initial_data/version.py
-    dynamic_initial_data/apps.py
 source = dynamic_initial_data
 [report]
 exclude_lines =
