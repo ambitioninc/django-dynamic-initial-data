@@ -2,9 +2,8 @@ from datetime import datetime
 
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ImproperlyConfigured
 from django.db.transaction import atomic
-from django.utils.module_loading import import_by_path
+from django.utils.module_loading import import_string
 
 from dynamic_initial_data.exceptions import InitialDataCircularDependency, InitialDataMissingApp
 from dynamic_initial_data.models import RegisteredForDeletionReceipt
@@ -89,7 +88,7 @@ class InitialDataUpdater(object):
             return self.loaded_apps.get(app)
 
         self.loaded_apps[app] = None
-        initial_data_class = import_by_path(self.get_class_path(app))
+        initial_data_class = import_string(self.get_class_path(app))
         if issubclass(initial_data_class, BaseInitialData):
             self.log('Loaded app {0}'.format(app))
             self.loaded_apps[app] = initial_data_class
@@ -113,7 +112,7 @@ class InitialDataUpdater(object):
         # load the initial data class
         try:
             initial_data_class = self.load_app(app)
-        except ImproperlyConfigured:
+        except ImportError:
             self.log('Could not load {0}'.format(app))
             return
 
@@ -212,7 +211,7 @@ class InitialDataUpdater(object):
         # load the initial data class for the app
         try:
             initial_data_class = self.load_app(app)
-        except ImproperlyConfigured:
+        except ImportError:
             raise InitialDataMissingApp(dep=app)
 
         dependencies = initial_data_class.dependencies
