@@ -1,9 +1,8 @@
-from datetime import datetime
-
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.db.transaction import atomic
 from django.utils.module_loading import import_string
+from django.utils import timezone
 
 from dynamic_initial_data.exceptions import InitialDataCircularDependency, InitialDataMissingApp
 from dynamic_initial_data.models import RegisteredForDeletionReceipt
@@ -157,18 +156,12 @@ class InitialDataUpdater(object):
             deduplicated_objs[key] = model
 
         # Create receipts for every object registered for deletion
-        now = datetime.utcnow()
-        registered_for_deletion_receipts = [
-            RegisteredForDeletionReceipt(
-                model_obj_type=ContentType.objects.get_for_model(model_obj, for_concrete_model=False),
-                model_obj_id=model_obj.id,
-                register_time=now)
-            for model_obj in deduplicated_objs.values()
-        ]
-
-        # Do a bulk upsert on all of the receipts, updating their registration time.
-        RegisteredForDeletionReceipt.objects.bulk_upsert(
-            registered_for_deletion_receipts, ['model_obj_type_id', 'model_obj_id'], update_fields=['register_time'])
+        # Do a upserts on all of the receipts, updating their registration time.
+        now = timezone.now()
+        for model_obj in deduplicated_objs.values():
+            RegisteredForDeletionReceipt.objects.upsert(updates={'register_time': now},
+                                                        model_obj_type=ContentType.objects.get_for_model(model_obj, for_concrete_model=False),
+                                                        model_obj_id=model_obj.id)
 
         # Delete all receipts and their associated model objects that weren't updated
         for receipt in RegisteredForDeletionReceipt.objects.exclude(register_time=now):
