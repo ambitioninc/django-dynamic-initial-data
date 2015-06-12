@@ -1,4 +1,4 @@
-from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from manager_utils import ManagerUtilsManager
@@ -12,7 +12,7 @@ class RegisteredForDeletionReceipt(models.Model):
     # The model object that was registered
     model_obj_type = models.ForeignKey(ContentType)
     model_obj_id = models.PositiveIntegerField()
-    model_obj = generic.GenericForeignKey('model_obj_type', 'model_obj_id', for_concrete_model=False)
+    model_obj = GenericForeignKey('model_obj_type', 'model_obj_id', for_concrete_model=False)
 
     # The time at which it was registered for deletion
     register_time = models.DateTimeField()

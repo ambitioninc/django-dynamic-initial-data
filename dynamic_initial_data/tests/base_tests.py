@@ -222,14 +222,14 @@ class InitialDataUpdaterTest(TestCase):
         # cover the branch that prints if verbose is true
         initial_data_manager.log('test')
 
-    @patch('dynamic_initial_data.base.import_by_path', return_value=MockInitialData)
+    @patch('dynamic_initial_data.base.import_string', return_value=MockInitialData)
     def test_load_app_exists(self, import_patch):
         """
         Tests the load_app method on an app that exists
         """
         self.assertEqual(MockInitialData, InitialDataUpdater().load_app('fake'))
 
-    @patch('dynamic_initial_data.base.import_by_path', return_value=MockInitialData)
+    @patch('dynamic_initial_data.base.import_string', return_value=MockInitialData)
     def test_load_app_cached(self, import_patch):
         """
         Tests that the cache is hit since import is only called once.
@@ -240,7 +240,7 @@ class InitialDataUpdaterTest(TestCase):
         initial_data_updater.load_app('fake')
         self.assertEquals(import_patch.call_count, 1)
 
-    @patch('dynamic_initial_data.base.import_by_path', return_value=MockClass)
+    @patch('dynamic_initial_data.base.import_string', return_value=MockClass)
     def test_load_app_doesnt_exist(self, import_patch):
         """
         Tests the load_app method on an app that doesnt exist
