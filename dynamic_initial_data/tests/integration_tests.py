@@ -1,8 +1,7 @@
 from django.test import TestCase
 from mock import patch
 
-from dynamic_initial_data import BaseInitialData
-from dynamic_initial_data.base import InitialDataUpdater
+from dynamic_initial_data.base import BaseInitialData, InitialDataUpdater
 from dynamic_initial_data.models import RegisteredForDeletionReceipt
 from dynamic_initial_data.tests.models import Account
 
