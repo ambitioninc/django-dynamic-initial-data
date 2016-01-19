@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.db.transaction import atomic
