@@ -122,7 +122,7 @@ class InitialDataUpdater(object):
 
         # update initial data of dependencies
         for dependency in dependencies:
-            self.update_app(dependency)
+            self.update_app(dependency, handle_deletions=False)
 
         self.log('Updating app {0}'.format(app))
 
