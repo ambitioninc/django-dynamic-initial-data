@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.db.transaction import atomic
@@ -95,7 +97,7 @@ class InitialDataUpdater(object):
         return self.loaded_apps[app]
 
     @atomic
-    def update_app(self, app, handle_deletions=True):
+    def update_app(self, app):
         """
         Loads and runs `update_initial_data` of the specified app. Any dependencies contained within the
         initial data class will be run recursively. Dependency cycles are checked for and a cache is built
@@ -122,7 +124,7 @@ class InitialDataUpdater(object):
 
         # update initial data of dependencies
         for dependency in dependencies:
-            self.update_app(dependency, handle_deletions=False)
+            self.update_app(dependency)
 
         self.log('Updating app {0}'.format(app))
 
@@ -138,11 +140,6 @@ class InitialDataUpdater(object):
 
         # keep track that this app has been updated
         self.updated_apps.add(app)
-
-        # Handle deletions if necessary, this could be a single call that was nat batched with multiple updates
-        # We cannot handle this case yet since we do not know what app registered what deletions
-        # if handle_deletions:
-        #     self.handle_deletions()
 
     def handle_deletions(self):
         """
@@ -190,13 +187,8 @@ class InitialDataUpdater(object):
         Loops through all app names contained in settings.INSTALLED_APPS and calls `update_app`
         on each one. Handles any object deletions that happened after all apps have been initialized.
         """
-
-        # Loop over all the apps and update each one, buffering the deletions until the end
         for app in apps.get_app_configs():
-            self.update_app(
-                app=app.name,
-                handle_deletions=False
-            )
+            self.update_app(app.name)
 
         # During update_app, all apps added model objects that were registered for deletion.
         # Delete all objects that were previously managed by the initial data process
