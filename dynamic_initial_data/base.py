@@ -140,8 +140,9 @@ class InitialDataUpdater(object):
         self.updated_apps.add(app)
 
         # Handle deletions if necessary, this could be a single call that was nat batched with multiple updates
-        if handle_deletions:
-            self.handle_deletions()
+        # We cannot handle this case yet since we do not know what app registered what deletions
+        # if handle_deletions:
+        #     self.handle_deletions()
 
     def handle_deletions(self):
         """
