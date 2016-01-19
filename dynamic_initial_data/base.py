@@ -1,8 +1,7 @@
-from datetime import datetime
-
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.db.transaction import atomic
+from django.utils import timezone
 from django.utils.module_loading import import_string
 
 from dynamic_initial_data.exceptions import InitialDataCircularDependency, InitialDataMissingApp
@@ -96,7 +95,7 @@ class InitialDataUpdater(object):
         return self.loaded_apps[app]
 
     @atomic
-    def update_app(self, app):
+    def update_app(self, app, handle_deletions=True):
         """
         Loads and runs `update_initial_data` of the specified app. Any dependencies contained within the
         initial data class will be run recursively. Dependency cycles are checked for and a cache is built
@@ -140,6 +139,10 @@ class InitialDataUpdater(object):
         # keep track that this app has been updated
         self.updated_apps.add(app)
 
+        # Handle deletions if necessary, this could be a single call that was nat batched with multiple updates
+        if handle_deletions:
+            self.handle_deletions()
+
     def handle_deletions(self):
         """
         Manages handling deletions of objects that were previously managed by the initial data process but no longer
@@ -157,7 +160,7 @@ class InitialDataUpdater(object):
             deduplicated_objs[key] = model
 
         # Create receipts for every object registered for deletion
-        now = datetime.utcnow()
+        now = timezone.now()
         registered_for_deletion_receipts = [
             RegisteredForDeletionReceipt(
                 model_obj_type=ContentType.objects.get_for_model(model_obj, for_concrete_model=False),
@@ -186,8 +189,13 @@ class InitialDataUpdater(object):
         Loops through all app names contained in settings.INSTALLED_APPS and calls `update_app`
         on each one. Handles any object deletions that happened after all apps have been initialized.
         """
+
+        # Loop over all the apps and update each one, buffering the deletions until the end
         for app in apps.get_app_configs():
-            self.update_app(app.name)
+            self.update_app(
+                app=app.name,
+                handle_deletions=False
+            )
 
         # During update_app, all apps added model objects that were registered for deletion.
         # Delete all objects that were previously managed by the initial data process

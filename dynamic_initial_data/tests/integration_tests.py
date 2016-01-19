@@ -211,3 +211,44 @@ class IntegrationTest(TestCase):
         self.assertEquals(Account.objects.count(), 1)
         self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 1)
         self.assertEquals(RegisteredForDeletionReceipt.objects.get().model_obj.name, 'hi')
+
+    def test_handle_deletions_when_update_app_is_called(self):
+        """
+        Tests handling of deletions and updates when they are registered from the update_initial_data function. And we
+        only update a single application and not all
+        """
+        class AccountInitialData1(BaseInitialData):
+            """
+            The initial data code the first time it is called. It registers two accounts for deletion
+            by returning it from the update_initial_data function.
+            """
+            def update_initial_data(self):
+                # Register two account objects for deletion
+                self.register_for_deletion(
+                    Account.objects.get_or_create(name='hi')[0], Account.objects.get_or_create(name='hi2')[0])
+
+        class AccountInitialData2(BaseInitialData):
+            """
+            The initial data code the second time it is called. It only manages one of the previous accounts
+            """
+            def update_initial_data(self):
+                self.register_for_deletion(Account.objects.get_or_create(name='hi')[0])
+
+        # Verify no account objects exist
+        self.assertEquals(Account.objects.count(), 0)
+
+        with patch.object(InitialDataUpdater, 'load_app', return_value=AccountInitialData1):
+            InitialDataUpdater().update_app('test')
+
+        # Verify two account objects were created and are managed by deletion receipts
+        self.assertEquals(Account.objects.count(), 2)
+        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 2)
+
+        # Run the initial data process again, this time deleting the account named 'hi2'
+        with patch.object(InitialDataUpdater, 'load_app', return_value=AccountInitialData2):
+            InitialDataUpdater().update_app('test')
+
+        # Verify only the 'hi' account exists
+        self.assertEquals(Account.objects.count(), 1)
+        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 1)
+        self.assertEquals(RegisteredForDeletionReceipt.objects.get().model_obj.name, 'hi')
