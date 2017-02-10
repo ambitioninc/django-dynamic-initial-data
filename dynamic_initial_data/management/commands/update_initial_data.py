@@ -6,15 +6,12 @@ from dynamic_initial_data.base import InitialDataUpdater
 
 
 class Command(BaseCommand):
-    option_list = BaseCommand.option_list + (
-        make_option(
-            '--verbose', action='store_true', dest='verbose', default=False,
-            help='Determines if we should display which apps are being updated'
-        ),
-        make_option(
+    def add_arguments(self, parser):
+        parser.add_argument('--verbose', action='store_true', dest='verbose', default=False, help='Determines if we should display which apps are being updated' )
+        parser.add_argument(
             '--app', dest='app', default=None, help='Updates a single app'
         )
-    )
+    
 
     help = 'Call the InitialData.update_initial_data command for all apps. Use --app to update only one app.'
 
