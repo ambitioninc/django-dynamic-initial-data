@@ -1,5 +1,3 @@
-from optparse import make_option
-
 from django.core.management.base import BaseCommand
 
 from dynamic_initial_data.base import InitialDataUpdater
