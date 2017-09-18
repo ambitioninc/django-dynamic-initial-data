@@ -32,6 +32,7 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
@@ -39,8 +40,8 @@ setup(
     ],
     license='MIT',
     install_requires=[
-        'django>=1.8',
-        'django-manager-utils>=0.12.0',
+        'Django>=1.9',
+        'django-manager-utils>=0.13.0',
     ],
     tests_require=[
         'psycopg2',
