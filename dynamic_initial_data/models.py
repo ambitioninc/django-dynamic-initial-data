@@ -10,7 +10,7 @@ class RegisteredForDeletionReceipt(models.Model):
     initial data process.
     """
     # The model object that was registered
-    model_obj_type = models.ForeignKey(ContentType)
+    model_obj_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     model_obj_id = models.PositiveIntegerField()
     model_obj = GenericForeignKey('model_obj_type', 'model_obj_id', for_concrete_model=False)
 
