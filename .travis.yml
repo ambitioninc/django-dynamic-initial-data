@@ -13,6 +13,10 @@ env:
     - DJANGO=">=1.10,<1.11"
     - DJANGO=">=1.11,<2.0"
     - DJANGO=">=2.0,<2.1"
+matrix:
+  exclude:
+  - python: 2.7
+    env: DJANGO=">=2.0,<2.1"
 install:
   - pip install -q coverage flake8 Django$DJANGO django-nose>=1.4
 before_script:
