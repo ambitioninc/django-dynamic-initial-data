@@ -1,6 +1,7 @@
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.db.transaction import atomic
+from django.utils import timezone
 from django.utils.module_loading import import_string
 from django.utils import timezone
 
@@ -167,7 +168,7 @@ class InitialDataUpdater(object):
         for receipt in RegisteredForDeletionReceipt.objects.exclude(register_time=now):
             try:
                 receipt.model_obj.delete()
-            except:
+            except:  # noqa
                 # The model object may no longer be there, its ctype may be invalid, or it might be protected.
                 # Regardless, the model object cannot be deleted, so go ahead and delete its receipt.
                 pass

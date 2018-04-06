@@ -1,7 +1,8 @@
 [![Build Status](https://travis-ci.org/ambitioninc/django-dynamic-initial-data.png)](https://travis-ci.org/ambitioninc/django-dynamic-initial-data)
+
 ## Django Initial Data
 
-Django Dynamic Initial Data is a `django>=1.6` app that helps solve the problem of initializing data for apps with
+Django Dynamic Initial Data is a `django>=1.6` and *postgresql* only app that helps solve the problem of initializing data for apps with
 dependencies and other conditional data. Rather than having static fixtures for each app, the initial data
 can be created and updated dynamically. Furthermore, Django Dynamic Initial Data also handles when objects are
 deleted from initial data, a feature that Django's initial data fixture system lacks.
