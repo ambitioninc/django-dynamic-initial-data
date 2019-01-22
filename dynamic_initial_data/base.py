@@ -115,7 +115,7 @@ class InitialDataUpdater(object):
             message = str(e)
 
             # Check if this error is simply the app not having initial data
-            if 'No module named' in message and '.fixtures' in message:
+            if 'No module named' in message and 'fixtures' in message:
                 self.log('No initial data file for {0}'.format(app))
                 return
             else:
