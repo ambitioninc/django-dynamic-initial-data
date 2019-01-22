@@ -1,7 +1,7 @@
 
 from django.test import TestCase
 from django.core.management import call_command
-from mock import patch, call
+from mock import patch
 
 from dynamic_initial_data.base import BaseInitialData, InitialDataUpdater
 from dynamic_initial_data.models import RegisteredForDeletionReceipt
