@@ -111,9 +111,16 @@ class InitialDataUpdater(object):
         # load the initial data class
         try:
             initial_data_class = self.load_app(app)
-        except ImportError:
-            self.log('Could not load {0}'.format(app))
-            return
+        except ImportError as e:
+            message = str(e)
+
+            # Check if this error is simply the app not having initial data
+            if 'No module named' in message and 'fixtures' in message:
+                self.log('No initial data file for {0}'.format(app))
+                return
+            else:
+                # This is an actual import error we should know about
+                raise
 
         self.log('Checking dependencies for {0}'.format(app))
 

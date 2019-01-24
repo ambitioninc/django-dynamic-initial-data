@@ -1,4 +1,6 @@
+
 from django.test import TestCase
+from django.core.management import call_command
 from mock import patch
 
 from dynamic_initial_data.base import BaseInitialData, InitialDataUpdater
@@ -211,3 +213,22 @@ class IntegrationTest(TestCase):
         self.assertEquals(Account.objects.count(), 1)
         self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 1)
         self.assertEquals(RegisteredForDeletionReceipt.objects.get().model_obj.name, 'hi')
+
+    @patch('dynamic_initial_data.base.InitialDataUpdater.log')
+    def test_missing_initial_data_file(self, mock_log):
+        """
+        Makes sure the log method is called when an app doesn't contain an initial_data file
+        :type mock_log: mock.Mock
+        """
+        call_command('update_initial_data', app='dynamic_initial_data.tests.fake_app_1')
+
+        expected_str = 'No initial data file for dynamic_initial_data.tests.fake_app_1'
+        mock_log.assert_called_once_with(expected_str)
+
+    def test_import_error(self):
+        """
+        Makes sure an actual exception is raised when an initial data file fails to import (when the error is not
+        just a missing file)
+        """
+        with self.assertRaises(ImportError):
+            call_command('update_initial_data', app='dynamic_initial_data.tests.fake_app_2')
