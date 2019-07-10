@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+v2.1.0
+------
+* Python 3.7
+* Django 2.1
+* Django 2.2
+
 v2.0.0
 ------
 * Drop Django 1.10 support
