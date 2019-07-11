@@ -22,6 +22,7 @@ setup(
     version=get_version(),
     description='Dynamic initial data fixtures for Django apps',
     long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
     url='https://github.com/ambitioninc/django-dynamic-initial-data',
     author='',
     author_email='opensource@ambition.com',
@@ -35,14 +36,13 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Framework :: Django',
-        'Framework :: Django :: 1.11',
         'Framework :: Django :: 2.0',
         'Framework :: Django :: 2.1',
         'Framework :: Django :: 2.2',
     ],
     license='MIT',
     install_requires=[
-        'Django>=1.11',
+        'Django>=2.0',
         'django-manager-utils>=1.1.1',
     ],
     tests_require=[
