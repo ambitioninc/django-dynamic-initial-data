@@ -1,3 +1,5 @@
+import json
+
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.db.transaction import atomic
@@ -5,7 +7,7 @@ from django.utils import timezone
 from django.utils.module_loading import import_string
 
 from dynamic_initial_data.exceptions import InitialDataCircularDependency, InitialDataMissingApp
-from dynamic_initial_data.models import RegisteredForDeletionReceipt
+from dynamic_initial_data.models import RegisteredForDeletionReceipt, CreationReceipt
 
 
 class BaseInitialData(object):
@@ -32,6 +34,29 @@ class BaseInitialData(object):
         no longer being managed by the initial data process.
         """
         self.model_objs_registered_for_deletion.extend(model_objs)
+
+    @atomic
+    def create_once(self, model_class, **kwargs):
+        """
+        Ensures that a model with given attributes is only created once. This is ideal for fixture data we want
+        initially populated within Ambition that can be permanently deleted by customer.
+
+        1. First we check for Creation Receipt.
+        2. If one didn't previously exist then create Model w/ Attributes.
+        """
+
+        # Get the Content Type
+        content_type = ContentType.objects.get_for_model(model_class)
+
+        # See if receipt exists for given model and attributes, if not then create
+        receipt, created = CreationReceipt.objects.get_or_create(
+            model_class_type=content_type,
+            model_attributes=json.dumps(kwargs)
+        )
+
+        # If receipt did not previously exist then go ahead and create model with given attributes
+        if created:
+            model_class.objects.create(**kwargs)
 
     def update_initial_data(self, *args, **kwargs):
         """

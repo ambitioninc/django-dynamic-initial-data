@@ -1,5 +1,6 @@
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from manager_utils import ManagerUtilsManager
 
@@ -22,3 +23,8 @@ class RegisteredForDeletionReceipt(models.Model):
 
     class Meta:
         unique_together = ('model_obj_type', 'model_obj_id')
+
+
+class CreationReceipt(models.Model):
+    model_class_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    model_attributes = JSONField()
