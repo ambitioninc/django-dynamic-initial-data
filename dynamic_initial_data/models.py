@@ -26,5 +26,6 @@ class RegisteredForDeletionReceipt(models.Model):
 
 
 class CreationReceipt(models.Model):
+    name = models.CharField(max_length=256, unique=True)
     model_class_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     model_attributes = JSONField()

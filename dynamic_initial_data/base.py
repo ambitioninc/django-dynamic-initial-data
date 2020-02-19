@@ -36,7 +36,7 @@ class BaseInitialData(object):
         self.model_objs_registered_for_deletion.extend(model_objs)
 
     @atomic
-    def create_once(self, model_class, **kwargs):
+    def create_once(self, model_class, unique_name, **kwargs):
         """
         Ensures that a model with given attributes is only created once. This is ideal for fixture data we want
         initially populated within Ambition that can be permanently deleted by customer.
@@ -50,8 +50,11 @@ class BaseInitialData(object):
 
         # See if receipt exists for given model and attributes, if not then create
         receipt, created = CreationReceipt.objects.get_or_create(
-            model_class_type=content_type,
-            model_attributes=json.dumps(kwargs)
+            unique_name=unique_name,
+            defaults={
+                'model_class_type': content_type,
+                'model_attributes': json.dumps(kwargs)
+            }
         )
 
         # If receipt did not previously exist then go ahead and create model with given attributes
