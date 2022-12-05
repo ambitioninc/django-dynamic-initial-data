@@ -1,0 +1,3 @@
+# Minimum requirements
+Django>=2.2
+django-manager-utils>=3.0.1
