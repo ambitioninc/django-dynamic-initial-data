@@ -12,7 +12,7 @@ def configure_settings():
         test_db = os.environ.get('DB', None)
         if test_db is None:
             db_config = {
-                'ENGINE': 'django.db.backends.postgresql_psycopg2',
+                'ENGINE': 'django.db.backends.postgresql',
                 'NAME': 'ambition_dev',
                 'USER': 'ambition_dev',
                 'PASSWORD': 'ambition_dev',
@@ -20,7 +20,7 @@ def configure_settings():
             }
         elif test_db == 'postgres':
             db_config = {
-                'ENGINE': 'django.db.backends.postgresql_psycopg2',
+                'ENGINE': 'django.db.backends.postgresql',
                 'USER': 'postgres',
                 'NAME': 'dynamic_initial_data',
             }
