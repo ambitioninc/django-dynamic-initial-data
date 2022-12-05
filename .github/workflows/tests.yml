@@ -7,11 +7,11 @@ on:
 
 jobs:
   tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
-        python: ['3.7', '3.8', '3.9']
+        python: ['3.7', '3.8']
         # Time to switch to pytest or nose2?
         # nosetests is broken on 3.10
         # AttributeError: module 'collections' has no attribute 'Callable'
@@ -19,11 +19,9 @@ jobs:
         django:
         - 'Django~=2.2.0'
         - 'Django~=3.2.0'
-        - 'Django~=4.0.0'
-        - 'Django~=4.1.0'
         experimental: [false]
         include:
-        - python: '3.8'
+        - python: '3.7'
           django: 'https://github.com/django/django/archive/refs/heads/main.zip#egg=Django'
           experimental: true
           # NOTE this job will appear to pass even when it fails because of
@@ -37,11 +35,12 @@ jobs:
           django: 'Django~=4.1.0'
     services:
       postgres:
-        image: postgres:latest
+        image: postgres:14.5
         env:
           POSTGRES_DB: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_USER: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
         ports:
           - 5432:5432
         options: >-
@@ -67,7 +66,7 @@ jobs:
         DB_SETTINGS: >-
           {
             "ENGINE":"django.db.backends.postgresql",
-            "NAME":"querybuilder",
+            "NAME":"dynamic_initial_data",
             "USER":"postgres",
             "PASSWORD":"postgres",
             "HOST":"localhost",
@@ -76,15 +75,15 @@ jobs:
         DB_SETTINGS2: >-
           {
             "ENGINE":"django.db.backends.postgresql",
-            "NAME":"querybuilder2",
+            "NAME":"dynamic_initial_data2",
             "USER":"postgres",
             "PASSWORD":"postgres",
             "HOST":"localhost",
             "PORT":"5432"
           }
       run: |
-        coverage run manage.py test querybuilder
+        coverage run manage.py test dynamic_initial_data
         coverage report --fail-under=90
       continue-on-error: ${{ matrix.experimental }}
     - name: Check style
-      run: flake8 querybuilder
+      run: flake8 dynamic_initial_data
