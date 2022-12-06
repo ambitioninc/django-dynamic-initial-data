@@ -32,23 +32,52 @@ def configure_settings():
             db_config = json.loads(os.environ.get('DB_SETTINGS'))
 
         installed_apps = [
+            'django.contrib.admin',
             'django.contrib.auth',
             'django.contrib.contenttypes',
             'django.contrib.sessions',
-            'django.contrib.admin',
+            'django.contrib.messages',
             'dynamic_initial_data',
             'dynamic_initial_data.tests',
         ]
+
+        middleware = [
+            'django.middleware.security.SecurityMiddleware',
+            'django.contrib.sessions.middleware.SessionMiddleware',
+            'django.middleware.common.CommonMiddleware',
+            'django.middleware.csrf.CsrfViewMiddleware',
+            'django.contrib.auth.middleware.AuthenticationMiddleware',
+            'django.contrib.messages.middleware.MessageMiddleware',
+            'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        ]
+
+        templates = [
+            {
+                'BACKEND': 'django.template.backends.django.DjangoTemplates',
+                'DIRS': [],
+                'APP_DIRS': True,
+                'OPTIONS': {
+                    'context_processors': [
+                        'django.template.context_processors.debug',
+                        'django.template.context_processors.request',
+                        'django.contrib.auth.context_processors.auth',
+                        'django.contrib.messages.context_processors.messages',
+                    ],
+                },
+            },
+        ]
+
         settings.configure(
             TEST_RUNNER='django_nose.NoseTestSuiteRunner',
             NOSE_ARGS=['--nocapture', '--nologcapture', '--verbosity=1'],
             DATABASES={
                 'default': db_config,
             },
-            MIDDLEWARE_CLASSES={},
             INSTALLED_APPS=installed_apps,
+            MIDDLEWARE=middleware,
+            TEMPLATES=templates,
             ROOT_URLCONF='dynamic_initial_data.urls',
             DEBUG=False,
+            SECRET_KEY='dj-dy-i-d',
             DDF_FILL_NULLABLE_FIELDS=False,
-            SECRET_KEY='dj-dy-i-d'
         )
