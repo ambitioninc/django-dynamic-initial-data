@@ -4,3 +4,4 @@ django-nose
 freezegun
 mock
 psycopg2
+flake8
