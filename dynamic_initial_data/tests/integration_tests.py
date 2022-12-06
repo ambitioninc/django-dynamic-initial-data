@@ -21,15 +21,15 @@ class IntegrationTest(TestCase):
                 Account.objects.get_or_create()
 
         # Verify no account objects exist
-        self.assertEquals(Account.objects.count(), 0)
+        self.assertEqual(Account.objects.count(), 0)
 
         with patch.object(InitialDataUpdater, 'load_app', return_value=AccountInitialData) as load_app_mock:
             InitialDataUpdater().update_app('test_app')
             # It should be called twice - once for initial loading, and twice for dependency testing
-            self.assertEquals(load_app_mock.call_count, 2)
+            self.assertEqual(load_app_mock.call_count, 2)
 
         # Verify an account object was created
-        self.assertEquals(Account.objects.count(), 1)
+        self.assertEqual(Account.objects.count(), 1)
 
     def test_multiple_same_objects(self):
         """
@@ -45,15 +45,15 @@ class IntegrationTest(TestCase):
                 return [account, account, account]
 
         # Verify no account objects exist
-        self.assertEquals(Account.objects.count(), 0)
+        self.assertEqual(Account.objects.count(), 0)
 
         with patch.object(InitialDataUpdater, 'load_app', return_value=AccountInitialData1):
             InitialDataUpdater().update_all_apps()
             InitialDataUpdater().update_all_apps()
 
         # Verify an account object was created and is managed by a deletion receipt
-        self.assertEquals(Account.objects.count(), 1)
-        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 1)
+        self.assertEqual(Account.objects.count(), 1)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.count(), 1)
 
     def test_handle_deletions_returned_from_update_initial_data(self):
         """
@@ -77,14 +77,14 @@ class IntegrationTest(TestCase):
                 pass
 
         # Verify no account objects exist
-        self.assertEquals(Account.objects.count(), 0)
+        self.assertEqual(Account.objects.count(), 0)
 
         with patch.object(InitialDataUpdater, 'load_app', return_value=AccountInitialData1):
             InitialDataUpdater().update_all_apps()
 
         # Verify an account object was created and is managed by a deletion receipt
-        self.assertEquals(Account.objects.count(), 1)
-        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 1)
+        self.assertEqual(Account.objects.count(), 1)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.count(), 1)
 
         # Run the initial data process again, this time not registering the account for
         # deletion. It should be deleted.
@@ -92,8 +92,8 @@ class IntegrationTest(TestCase):
             InitialDataUpdater().update_all_apps()
 
         # Verify there are no accounts or receipts
-        self.assertEquals(Account.objects.count(), 0)
-        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 0)
+        self.assertEqual(Account.objects.count(), 0)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.count(), 0)
 
     def test_handle_deletions_updates_returned_from_update_initial_data(self):
         """
@@ -116,23 +116,23 @@ class IntegrationTest(TestCase):
                 return [Account.objects.get_or_create(name='hi')[0]]
 
         # Verify no account objects exist
-        self.assertEquals(Account.objects.count(), 0)
+        self.assertEqual(Account.objects.count(), 0)
 
         with patch.object(InitialDataUpdater, 'load_app', return_value=AccountInitialData1):
             InitialDataUpdater().update_all_apps()
 
         # Verify two account objects were created and are managed by deletion receipts
-        self.assertEquals(Account.objects.count(), 2)
-        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 2)
+        self.assertEqual(Account.objects.count(), 2)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.count(), 2)
 
         # Run the initial data process again, this time deleting the account named 'hi2'
         with patch.object(InitialDataUpdater, 'load_app', return_value=AccountInitialData2):
             InitialDataUpdater().update_all_apps()
 
         # Verify only the 'hi' account exists
-        self.assertEquals(Account.objects.count(), 1)
-        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 1)
-        self.assertEquals(RegisteredForDeletionReceipt.objects.get().model_obj.name, 'hi')
+        self.assertEqual(Account.objects.count(), 1)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.count(), 1)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.get().model_obj.name, 'hi')
 
     def test_handle_deletions_registered_from_update_initial_data(self):
         """
@@ -156,14 +156,14 @@ class IntegrationTest(TestCase):
                 pass
 
         # Verify no account objects exist
-        self.assertEquals(Account.objects.count(), 0)
+        self.assertEqual(Account.objects.count(), 0)
 
         with patch.object(InitialDataUpdater, 'load_app', return_value=AccountInitialData1):
             InitialDataUpdater().update_all_apps()
 
         # Verify an account object was created and is managed by a deletion receipt
-        self.assertEquals(Account.objects.count(), 1)
-        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 1)
+        self.assertEqual(Account.objects.count(), 1)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.count(), 1)
 
         # Run the initial data process again, this time not registering the account for
         # deletion. It should be deleted.
@@ -171,8 +171,8 @@ class IntegrationTest(TestCase):
             InitialDataUpdater().update_all_apps()
 
         # Verify there are no accounts or receipts
-        self.assertEquals(Account.objects.count(), 0)
-        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 0)
+        self.assertEqual(Account.objects.count(), 0)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.count(), 0)
 
     def test_handle_deletions_updates_registered_from_update_initial_data(self):
         """
@@ -196,23 +196,23 @@ class IntegrationTest(TestCase):
                 self.register_for_deletion(Account.objects.get_or_create(name='hi')[0])
 
         # Verify no account objects exist
-        self.assertEquals(Account.objects.count(), 0)
+        self.assertEqual(Account.objects.count(), 0)
 
         with patch.object(InitialDataUpdater, 'load_app', return_value=AccountInitialData1):
             InitialDataUpdater().update_all_apps()
 
         # Verify two account objects were created and are managed by deletion receipts
-        self.assertEquals(Account.objects.count(), 2)
-        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 2)
+        self.assertEqual(Account.objects.count(), 2)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.count(), 2)
 
         # Run the initial data process again, this time deleting the account named 'hi2'
         with patch.object(InitialDataUpdater, 'load_app', return_value=AccountInitialData2):
             InitialDataUpdater().update_all_apps()
 
         # Verify only the 'hi' account exists
-        self.assertEquals(Account.objects.count(), 1)
-        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 1)
-        self.assertEquals(RegisteredForDeletionReceipt.objects.get().model_obj.name, 'hi')
+        self.assertEqual(Account.objects.count(), 1)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.count(), 1)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.get().model_obj.name, 'hi')
 
     @patch('dynamic_initial_data.base.InitialDataUpdater.log')
     def test_missing_initial_data_file(self, mock_log):
