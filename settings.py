@@ -50,4 +50,5 @@ def configure_settings():
             ROOT_URLCONF='dynamic_initial_data.urls',
             DEBUG=False,
             DDF_FILL_NULLABLE_FIELDS=False,
+            SECRET_KEY='dj-dy-i-d'
         )
