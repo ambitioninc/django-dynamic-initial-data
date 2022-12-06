@@ -28,9 +28,9 @@ jobs:
             # `continue-on-error: true`. Github Actions apparently does not
             # have this feature, similar to Travis' allow-failure, yet.
             # https://github.com/actions/toolkit/issues/399
-            exclude:
-              - python: '3.8'
-                django: 'Django~=2.2.0'
+        exclude:
+          - python: '3.8'
+            django: 'Django~=2.2.0'
     #        - python: '3.7'
     #          django: 'Django~=4.1.0'
     services:
