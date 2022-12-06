@@ -6,7 +6,7 @@ from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
 from django_dynamic_fixture import G
 from freezegun import freeze_time
-from mock import patch
+from unittest.mock import patch
 
 from dynamic_initial_data.base import BaseInitialData, InitialDataUpdater
 from dynamic_initial_data.exceptions import InitialDataMissingApp, InitialDataCircularDependency

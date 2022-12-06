@@ -49,7 +49,6 @@ setup(
         'django-dynamic-fixture',
         'django-nose>=1.4',
         'freezegun',
-        'mock',
     ],
     test_suite='run_tests.run_tests',
     include_package_data=True,
