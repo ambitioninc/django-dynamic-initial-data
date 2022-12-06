@@ -1,9 +1,9 @@
 name: django-dynamic-initial-data tests
 on:
   push:
-    branches: [master]
+    branches: [ master ]
   pull_request:
-    branches: [master,develop]
+    branches: [ master,develop ]
 
 jobs:
   tests:
@@ -11,8 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: ['3.7']
-        # python: ['3.7', '3.8']
+        python: [ '3.7','3.8' ]
         # Time to switch to pytest or nose2?
         # nosetests is broken on 3.10
         # AttributeError: module 'collections' has no attribute 'Callable'
@@ -20,18 +19,18 @@ jobs:
         django:
           - 'Django~=2.2.0'
           - 'Django~=3.2.0'
-        #        experimental: [false]
-        # include:
-        #        - python: '3.7'
-        #          django: 'https://github.com/django/django/archive/refs/heads/main.zip#egg=Django'
-        #          experimental: true
-        # NOTE this job will appear to pass even when it fails because of
-        # `continue-on-error: true`. Github Actions apparently does not
-        # have this feature, similar to Travis' allow-failure, yet.
-        # https://github.com/actions/toolkit/issues/399
-    #        exclude:
-    #        - python: '3.7'
-    #          django: 'Django~=4.0.0'
+            #        experimental: [false]
+            # include:
+            #        - python: '3.7'
+            #          django: 'https://github.com/django/django/archive/refs/heads/main.zip#egg=Django'
+            #          experimental: true
+            # NOTE this job will appear to pass even when it fails because of
+            # `continue-on-error: true`. Github Actions apparently does not
+            # have this feature, similar to Travis' allow-failure, yet.
+            # https://github.com/actions/toolkit/issues/399
+            exclude:
+              - python: '3.8'
+                django: 'Django~=2.2.0'
     #        - python: '3.7'
     #          django: 'Django~=4.1.0'
     services:
@@ -84,6 +83,7 @@ jobs:
         #            "PORT":"5432"
         #          }
         run: |
+          python manage.py check
           coverage run manage.py test dynamic_initial_data
           coverage report --fail-under=90
       #     continue-on-error: ${{ matrix.experimental }}
