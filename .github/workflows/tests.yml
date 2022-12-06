@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: [ '3.7','3.8' ]
+        python: [ '3.7','3.8','3.9' ]
         # Time to switch to pytest or nose2?
         # nosetests is broken on 3.10
         # AttributeError: module 'collections' has no attribute 'Callable'
@@ -19,6 +19,8 @@ jobs:
         django:
           - 'Django~=2.2.0'
           - 'Django~=3.2.0'
+          - 'Django~=4.0.0'
+          - 'Django~=4.1.0'
             #        experimental: [false]
             # include:
             #        - python: '3.7'
@@ -31,8 +33,12 @@ jobs:
         exclude:
           - python: '3.8'
             django: 'Django~=2.2.0'
-    #        - python: '3.7'
-    #          django: 'Django~=4.1.0'
+          - python: '3.9'
+            django: 'Django~=2.2.0'
+          - python: '3.7'
+            django: 'Django~=4.0.0'
+          - python: '3.7'
+            django: 'Django~=4.1.0'
     services:
       postgres:
         image: postgres:14.5
