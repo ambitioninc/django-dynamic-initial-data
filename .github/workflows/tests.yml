@@ -11,14 +11,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: ['3.7', '3.8']
+        python: ['3.7']
+        # python: ['3.7', '3.8']
         # Time to switch to pytest or nose2?
         # nosetests is broken on 3.10
         # AttributeError: module 'collections' has no attribute 'Callable'
         # https://github.com/nose-devs/nose/issues/1099
         django:
-        - 'Django~=2.2.0'
-        - 'Django~=3.2.0'
+        - 'Django<3'
+        # - 'Django~=3.2.0'
         experimental: [false]
         include:
         - python: '3.7'
@@ -63,24 +64,25 @@ jobs:
         pip freeze
     - name: Run tests
       env:
-        DB_SETTINGS: >-
-          {
-            "ENGINE":"django.db.backends.postgresql",
-            "NAME":"dynamic_initial_data",
-            "USER":"postgres",
-            "PASSWORD":"postgres",
-            "HOST":"localhost",
-            "PORT":"5432"
-          }
-        DB_SETTINGS2: >-
-          {
-            "ENGINE":"django.db.backends.postgresql",
-            "NAME":"dynamic_initial_data2",
-            "USER":"postgres",
-            "PASSWORD":"postgres",
-            "HOST":"localhost",
-            "PORT":"5432"
-          }
+        DB: postgres
+#        DB_SETTINGS: >-
+#          {
+#            "ENGINE":"django.db.backends.postgresql",
+#            "NAME":"dynamic_initial_data",
+#            "USER":"postgres",
+#            "PASSWORD":"postgres",
+#            "HOST":"localhost",
+#            "PORT":"5432"
+#          }
+#        DB_SETTINGS2: >-
+#          {
+#            "ENGINE":"django.db.backends.postgresql",
+#            "NAME":"dynamic_initial_data2",
+#            "USER":"postgres",
+#            "PASSWORD":"postgres",
+#            "HOST":"localhost",
+#            "PORT":"5432"
+#          }
       run: |
         coverage run manage.py test dynamic_initial_data
         coverage report --fail-under=90
