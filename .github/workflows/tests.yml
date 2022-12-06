@@ -18,22 +18,22 @@ jobs:
         # AttributeError: module 'collections' has no attribute 'Callable'
         # https://github.com/nose-devs/nose/issues/1099
         django:
-        - 'Django<3'
-        # - 'Django~=3.2.0'
-        experimental: [false]
-        include:
-        - python: '3.7'
-          django: 'https://github.com/django/django/archive/refs/heads/main.zip#egg=Django'
-          experimental: true
-          # NOTE this job will appear to pass even when it fails because of
-          # `continue-on-error: true`. Github Actions apparently does not
-          # have this feature, similar to Travis' allow-failure, yet.
-          # https://github.com/actions/toolkit/issues/399
-        exclude:
-        - python: '3.7'
-          django: 'Django~=4.0.0'
-        - python: '3.7'
-          django: 'Django~=4.1.0'
+          - 'Django~=2.2.0'
+          - 'Django~=3.2.0'
+        #        experimental: [false]
+        # include:
+        #        - python: '3.7'
+        #          django: 'https://github.com/django/django/archive/refs/heads/main.zip#egg=Django'
+        #          experimental: true
+        # NOTE this job will appear to pass even when it fails because of
+        # `continue-on-error: true`. Github Actions apparently does not
+        # have this feature, similar to Travis' allow-failure, yet.
+        # https://github.com/actions/toolkit/issues/399
+    #        exclude:
+    #        - python: '3.7'
+    #          django: 'Django~=4.0.0'
+    #        - python: '3.7'
+    #          django: 'Django~=4.1.0'
     services:
       postgres:
         image: postgres:14.5
@@ -50,41 +50,42 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python }}
-    - name: Setup
-      run: |
-        python --version
-        pip install --upgrade pip wheel setuptools
-        pip install -r requirements/requirements.txt
-        pip install -r requirements/requirements-testing.txt
-        pip install "${{ matrix.django }}"
-        pip freeze
-    - name: Run tests
-      env:
-        DB_SETTINGS: >-
-          {
-            "ENGINE":"django.db.backends.postgresql",
-            "NAME":"dynamic_initial_data",
-            "USER":"postgres",
-            "PASSWORD":"postgres",
-            "HOST":"localhost",
-            "PORT":"5432"
-          }
-#        DB_SETTINGS2: >-
-#          {
-#            "ENGINE":"django.db.backends.postgresql",
-#            "NAME":"dynamic_initial_data2",
-#            "USER":"postgres",
-#            "PASSWORD":"postgres",
-#            "HOST":"localhost",
-#            "PORT":"5432"
-#          }
-      run: |
-        coverage run manage.py test dynamic_initial_data
-        coverage report --fail-under=90
-      continue-on-error: ${{ matrix.experimental }}
-    - name: Check style
-      run: flake8 dynamic_initial_data
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python }}
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install requirements
+        run: |
+          python --version
+          pip install --upgrade pip wheel setuptools
+          pip install -r requirements/requirements.txt
+          pip install -r requirements/requirements-testing.txt
+          pip install "${{ matrix.django }}"
+          pip freeze
+      - name: Run tests
+        env:
+          DB_SETTINGS: >-
+            {
+              "ENGINE":"django.db.backends.postgresql",
+              "NAME":"dynamic_initial_data",
+              "USER":"postgres",
+              "PASSWORD":"postgres",
+              "HOST":"localhost",
+              "PORT":"5432"
+            }
+        #        DB_SETTINGS2: >-
+        #          {
+        #            "ENGINE":"django.db.backends.postgresql",
+        #            "NAME":"dynamic_initial_data2",
+        #            "USER":"postgres",
+        #            "PASSWORD":"postgres",
+        #            "HOST":"localhost",
+        #            "PORT":"5432"
+        #          }
+        run: |
+          coverage run manage.py test dynamic_initial_data
+          coverage report --fail-under=90
+      #     continue-on-error: ${{ matrix.experimental }}
+      - name: Check style
+        run: flake8 dynamic_initial_data
