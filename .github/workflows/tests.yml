@@ -74,4 +74,3 @@ jobs:
       continue-on-error: ${{ matrix.experimental }}
     - name: Check style
       run: flake8 dynamic_initial_data
-  
