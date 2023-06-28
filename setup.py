@@ -17,6 +17,14 @@ def get_version():
         raise RuntimeError('Unable to find version string in {0}.'.format(VERSION_FILE))
 
 
+def get_lines(file_path):
+    return open(file_path, 'r').read().split('\n')
+
+
+install_requires = get_lines('requirements/requirements.txt')
+tests_require = get_lines('requirements/requirements-testing.txt')
+
+
 setup(
     name='django-dynamic-initial-data',
     version=get_version(),
@@ -41,9 +49,11 @@ setup(
         'Framework :: Django :: 2.2',
     ],
     license='MIT',
+    install_requires=install_requires,
+    tests_require=tests_require,
+
     install_requires=[
-        'Django>=2.0',
-        'django-manager-utils>=1.4.0',
+
     ],
     tests_require=[
         'psycopg2',
