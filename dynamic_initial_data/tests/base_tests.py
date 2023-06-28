@@ -6,7 +6,7 @@ from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
 from django_dynamic_fixture import G
 from freezegun import freeze_time
-from mock import patch
+from unittest.mock import patch
 
 from dynamic_initial_data.base import BaseInitialData, InitialDataUpdater
 from dynamic_initial_data.exceptions import InitialDataMissingApp, InitialDataCircularDependency
@@ -31,7 +31,7 @@ class BaseInitialDataTest(TestCase):
         initial_data = BaseInitialData()
         account = G(Account)
         initial_data.register_for_deletion(account)
-        self.assertEquals(initial_data.get_model_objs_registered_for_deletion(), [account])
+        self.assertEqual(initial_data.get_model_objs_registered_for_deletion(), [account])
 
     def test_register_for_deletion_multiple_args(self):
         """
@@ -41,7 +41,7 @@ class BaseInitialDataTest(TestCase):
         account1 = G(Account)
         account2 = G(Account)
         initial_data.register_for_deletion(account1, account2)
-        self.assertEquals(initial_data.get_model_objs_registered_for_deletion(), [account1, account2])
+        self.assertEqual(initial_data.get_model_objs_registered_for_deletion(), [account1, account2])
 
 
 class TestInvalidDeletions(TransactionTestCase):
@@ -59,10 +59,10 @@ class TestInvalidDeletions(TransactionTestCase):
         RegisteredForDeletionReceipt.objects.create(model_obj=account, register_time=datetime(2013, 4, 5))
         initial_data_updater.model_objs_registered_for_deletion = []
 
-        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 2)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.count(), 2)
         with transaction.atomic():
             initial_data_updater.handle_deletions()
-        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 0)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.count(), 0)
 
 
 class TestHandleDeletions(TestCase):
@@ -86,13 +86,13 @@ class TestHandleDeletions(TestCase):
         account = G(Account)
         self.initial_data_updater.model_objs_registered_for_deletion = [account]
 
-        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 0)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.count(), 0)
         with freeze_time('2013-04-12'):
             self.initial_data_updater.handle_deletions()
         receipt = RegisteredForDeletionReceipt.objects.get()
-        self.assertEquals(receipt.model_obj_type, ContentType.objects.get_for_model(Account))
-        self.assertEquals(receipt.model_obj_id, account.id)
-        self.assertEquals(receipt.register_time, datetime(2013, 4, 12))
+        self.assertEqual(receipt.model_obj_type, ContentType.objects.get_for_model(Account))
+        self.assertEqual(receipt.model_obj_id, account.id)
+        self.assertEqual(receipt.register_time, datetime(2013, 4, 12))
 
     def test_create_dup_objs(self):
         """
@@ -101,13 +101,13 @@ class TestHandleDeletions(TestCase):
         account = G(Account)
         self.initial_data_updater.model_objs_registered_for_deletion = [account, account]
 
-        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 0)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.count(), 0)
         with freeze_time('2013-04-12'):
             self.initial_data_updater.handle_deletions()
         receipt = RegisteredForDeletionReceipt.objects.get()
-        self.assertEquals(receipt.model_obj_type, ContentType.objects.get_for_model(Account))
-        self.assertEquals(receipt.model_obj_id, account.id)
-        self.assertEquals(receipt.register_time, datetime(2013, 4, 12))
+        self.assertEqual(receipt.model_obj_type, ContentType.objects.get_for_model(Account))
+        self.assertEqual(receipt.model_obj_id, account.id)
+        self.assertEqual(receipt.register_time, datetime(2013, 4, 12))
 
     def test_create_dup_proxy_objs(self):
         """
@@ -117,22 +117,22 @@ class TestHandleDeletions(TestCase):
         proxy_account = ProxyAccount.objects.get(id=account.id)
         self.initial_data_updater.model_objs_registered_for_deletion = [account, account, proxy_account]
 
-        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 0)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.count(), 0)
         with freeze_time('2013-04-12'):
             self.initial_data_updater.handle_deletions()
-        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 2)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.count(), 2)
 
         receipt = RegisteredForDeletionReceipt.objects.get(model_obj_type=ContentType.objects.get_for_model(account))
-        self.assertEquals(receipt.model_obj_type, ContentType.objects.get_for_model(Account))
-        self.assertEquals(receipt.model_obj_id, account.id)
-        self.assertEquals(receipt.register_time, datetime(2013, 4, 12))
+        self.assertEqual(receipt.model_obj_type, ContentType.objects.get_for_model(Account))
+        self.assertEqual(receipt.model_obj_id, account.id)
+        self.assertEqual(receipt.register_time, datetime(2013, 4, 12))
 
         receipt = RegisteredForDeletionReceipt.objects.get(
             model_obj_type=ContentType.objects.get_for_model(proxy_account, for_concrete_model=False))
-        self.assertEquals(
+        self.assertEqual(
             receipt.model_obj_type, ContentType.objects.get_for_model(ProxyAccount, for_concrete_model=False))
-        self.assertEquals(receipt.model_obj_id, proxy_account.id)
-        self.assertEquals(receipt.register_time, datetime(2013, 4, 12))
+        self.assertEqual(receipt.model_obj_id, proxy_account.id)
+        self.assertEqual(receipt.register_time, datetime(2013, 4, 12))
 
     def test_create_delete_one_obj(self):
         """
@@ -141,21 +141,21 @@ class TestHandleDeletions(TestCase):
         account = G(Account)
         self.initial_data_updater.model_objs_registered_for_deletion = [account]
 
-        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 0)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.count(), 0)
         with freeze_time('2013-04-12'):
             self.initial_data_updater.handle_deletions()
         receipt = RegisteredForDeletionReceipt.objects.get()
-        self.assertEquals(receipt.model_obj_type, ContentType.objects.get_for_model(Account))
-        self.assertEquals(receipt.model_obj_id, account.id)
-        self.assertEquals(receipt.register_time, datetime(2013, 4, 12))
+        self.assertEqual(receipt.model_obj_type, ContentType.objects.get_for_model(Account))
+        self.assertEqual(receipt.model_obj_id, account.id)
+        self.assertEqual(receipt.register_time, datetime(2013, 4, 12))
 
         # Now, don't register the object for deletion and run it again at a different time
         self.initial_data_updater.model_objs_registered_for_deletion = []
         with freeze_time('2013-04-12 05:00:00'):
             self.initial_data_updater.handle_deletions()
         # The object should be deleted, along with its receipt
-        self.assertEquals(Account.objects.count(), 0)
-        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 0)
+        self.assertEqual(Account.objects.count(), 0)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.count(), 0)
 
     def test_create_update_one_obj(self):
         """
@@ -164,21 +164,21 @@ class TestHandleDeletions(TestCase):
         account = G(Account)
         self.initial_data_updater.model_objs_registered_for_deletion = [account]
 
-        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 0)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.count(), 0)
         with freeze_time('2013-04-12'):
             self.initial_data_updater.handle_deletions()
         receipt = RegisteredForDeletionReceipt.objects.get()
-        self.assertEquals(receipt.model_obj_type, ContentType.objects.get_for_model(Account))
-        self.assertEquals(receipt.model_obj_id, account.id)
-        self.assertEquals(receipt.register_time, datetime(2013, 4, 12))
+        self.assertEqual(receipt.model_obj_type, ContentType.objects.get_for_model(Account))
+        self.assertEqual(receipt.model_obj_id, account.id)
+        self.assertEqual(receipt.register_time, datetime(2013, 4, 12))
 
         # Run the deletion handler again at a different time. It should not delete the object
         with freeze_time('2013-04-12 05:00:00'):
             self.initial_data_updater.handle_deletions()
         # The object should not be deleted, along with its receipt
-        self.assertEquals(Account.objects.count(), 1)
-        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 1)
-        self.assertEquals(RegisteredForDeletionReceipt.objects.get().register_time, datetime(2013, 4, 12, 5))
+        self.assertEqual(Account.objects.count(), 1)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.count(), 1)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.get().register_time, datetime(2013, 4, 12, 5))
 
     def test_delete_already_deleted_obj(self):
         """
@@ -187,25 +187,25 @@ class TestHandleDeletions(TestCase):
         account = G(Account)
         self.initial_data_updater.model_objs_registered_for_deletion = [account]
 
-        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 0)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.count(), 0)
         with freeze_time('2013-04-12'):
             self.initial_data_updater.handle_deletions()
         receipt = RegisteredForDeletionReceipt.objects.get()
-        self.assertEquals(receipt.model_obj_type, ContentType.objects.get_for_model(Account))
-        self.assertEquals(receipt.model_obj_id, account.id)
-        self.assertEquals(receipt.register_time, datetime(2013, 4, 12))
+        self.assertEqual(receipt.model_obj_type, ContentType.objects.get_for_model(Account))
+        self.assertEqual(receipt.model_obj_id, account.id)
+        self.assertEqual(receipt.register_time, datetime(2013, 4, 12))
 
         # Delete the model object. The receipt should still exist
         account.delete()
-        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 1)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.count(), 1)
 
         # Now, don't register the object for deletion and run it again at a different time
         self.initial_data_updater.model_objs_registered_for_deletion = []
         with freeze_time('2013-04-12 05:00:00'):
             self.initial_data_updater.handle_deletions()
         # The object should be deleted, along with its receipt
-        self.assertEquals(Account.objects.count(), 0)
-        self.assertEquals(RegisteredForDeletionReceipt.objects.count(), 0)
+        self.assertEqual(Account.objects.count(), 0)
+        self.assertEqual(RegisteredForDeletionReceipt.objects.count(), 0)
 
 
 class InitialDataUpdaterTest(TestCase):
@@ -238,7 +238,7 @@ class InitialDataUpdaterTest(TestCase):
         initial_data_updater.load_app('fake')
         initial_data_updater.load_app('fake')
         initial_data_updater.load_app('fake')
-        self.assertEquals(import_patch.call_count, 1)
+        self.assertEqual(import_patch.call_count, 1)
 
     @patch('dynamic_initial_data.base.import_string', return_value=MockClass)
     def test_load_app_doesnt_exist(self, import_patch):
