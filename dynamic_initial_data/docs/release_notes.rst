@@ -3,9 +3,9 @@ Release Notes
 
 v3.0.0
 ------
-* Add support for django 3.0, 3.1, 3.2, 4.0, 4.1
+* Add support for django 3.2, 4.0, 4.1, 4.2
 * Add support for python 3.8, 3.9
-* Remove support for django 2.0, 2.1, 2.2
+* Remove support for django 2.0, 2.1, 2.2, 3.0, 3.1
 * Remove support for python 3.6
 
 v2.1.0
