@@ -38,30 +38,18 @@ setup(
     packages=find_packages(),
     classifiers=[
         'Programming Language :: Python',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Framework :: Django',
-        'Framework :: Django :: 2.0',
-        'Framework :: Django :: 2.1',
         'Framework :: Django :: 2.2',
+        'Framework :: Django :: 3.2',
     ],
     license='MIT',
     install_requires=install_requires,
     tests_require=tests_require,
-
-    install_requires=[
-
-    ],
-    tests_require=[
-        'psycopg2',
-        'django-dynamic-fixture',
-        'django-nose>=1.4',
-        'freezegun',
-        'mock',
-    ],
     test_suite='run_tests.run_tests',
     include_package_data=True,
 )
