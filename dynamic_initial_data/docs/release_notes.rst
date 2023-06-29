@@ -1,6 +1,10 @@
 Release Notes
 =============
 
+v2.2.1
+------
+* Fix manifest
+
 v2.2.0
 ------
 * Add support for django 3.2, 4.0, 4.1, 4.2
