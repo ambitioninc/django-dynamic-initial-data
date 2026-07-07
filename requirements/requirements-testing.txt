@@ -1,6 +1,4 @@
 coverage
 django-dynamic-fixture
-django-nose
-freezegun
-psycopg2
 flake8
+freezegun

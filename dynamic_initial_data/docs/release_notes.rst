@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+v3.0.0
+------
+* Support django 5.2 and 6.0, python 3.10 - 3.14
+* Drop support for python < 3.10 and django < 5.2
+* Replace django-nose with Django's ``DiscoverRunner``
+* Set ``USE_TZ=False`` explicitly in the test settings (django 5.0 flipped the
+  default to True)
+* Replace ``assertEquals`` (removed in python 3.12) with ``assertEqual``
+
 v2.2.1
 ------
 * Fix manifest

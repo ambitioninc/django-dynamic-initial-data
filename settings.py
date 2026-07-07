@@ -69,8 +69,6 @@ def configure_settings():
         ]
 
         settings.configure(
-            TEST_RUNNER='django_nose.NoseTestSuiteRunner',
-            NOSE_ARGS=['--nocapture', '--nologcapture', '--verbosity=1'],
             DATABASES={
                 'default': db_config,
             },
@@ -79,6 +77,7 @@ def configure_settings():
             TEMPLATES=templates,
             ROOT_URLCONF='dynamic_initial_data.urls',
             DEBUG=False,
+            USE_TZ=False,
             SECRET_KEY='dj-dy-i-d',
             DDF_FILL_NULLABLE_FIELDS=False,
         )
